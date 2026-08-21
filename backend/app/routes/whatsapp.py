@@ -54,14 +54,11 @@ async def meta_webhook(
     from app.services.whatsapp_service import whatsapp_service
     payload = await request.json()
 
-    print("META WEBHOOK payload:", payload, flush=True)
-
     try:
         entry = payload.get("entry", [{}])[0]
         changes = entry.get("changes", [{}])[0]
         value = changes.get("value", {})
         if "messages" not in value:
-            print("META WEBHOOK ignored, value keys:", list(value.keys()), flush=True)
             return {"status": "ignored"}
         message_id = value["messages"][0].get("id", "")
     except (IndexError, KeyError):
@@ -71,13 +68,11 @@ async def meta_webhook(
         return {"status": "duplicate"}
 
     msg = whatsapp_service.parse_incoming_meta(payload)
-    print("META WEBHOOK parsed msg:", msg, flush=True)
     if msg and msg.body:
         try:
             await handle_incoming(msg.from_phone, msg.body, db, background_tasks)
         except Exception as e:
-            print("handle_incoming ERROR:", e, flush=True)
-            import traceback; traceback.print_exc()
+            logger.error("handle_incoming error for %s: %s", msg.from_phone, e, exc_info=True)
 
     return {"status": "ok"}
 

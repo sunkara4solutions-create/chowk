@@ -25,19 +25,11 @@
         "backgroundColor": "#E85C1A"
       },
       "package": "com.chowk.app",
-      "usesCleartextTraffic": true,
-      "config": {
-        "googleMaps": {
-          "apiKey": "YOUR_GOOGLE_MAPS_KEY"
-        }
-      },
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "VIBRATE"
       ]
     },
     "web": {
@@ -49,7 +41,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow Chowk to use your location to find nearby jobs and workers."
+          "locationWhenInUsePermission": "Chowk uses your location to verify you are in your registered city and to show nearby jobs."
         }
       ],
       "expo-asset",

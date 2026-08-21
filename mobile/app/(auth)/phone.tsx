@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { router } from 'expo-router';
 import { COLORS } from '../../lib/config';
@@ -87,7 +88,10 @@ export default function PhoneScreen() {
           </TouchableOpacity>
 
           <Text style={styles.termsText}>
-            By continuing, you agree to our Terms of Service and Privacy Policy
+            By continuing, you agree to our{' '}
+            <Text style={styles.termsLink} onPress={() => Linking.openURL('https://chowk.yourstockpicker.com/privacy')}>
+              Privacy Policy
+            </Text>
           </Text>
         </View>
       </KeyboardAvoidingView>
@@ -212,5 +216,9 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: 'center',
     lineHeight: 16,
+  },
+  termsLink: {
+    color: COLORS.primary,
+    textDecorationLine: 'underline',
   },
 });

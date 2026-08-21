@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import { getWorkerMe, updateWorkerMe, updateWorkerLocation } from '../../lib/api';
+import { getWorkerMe, updateWorkerMe, updateWorkerLocation, deleteAccount } from '../../lib/api';
 import { useAuthStore } from '../../store/auth';
 import { COLORS, SKILLS, SKILL_LABELS } from '../../lib/config';
 import type { Worker } from '../../lib/types';
@@ -55,6 +55,27 @@ export default function WorkerProfile() {
 
   const toggleSkill = (s: string) =>
     setSelectedSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your profile, applications and all data. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive', onPress: async () => {
+            try {
+              await deleteAccount();
+              clearAuth();
+              router.replace('/(auth)/phone');
+            } catch {
+              Alert.alert('Error', 'Failed to delete account. Please try again.');
+            }
+          }
+        },
+      ]
+    );
+  };
 
   const handleVerifyLocation = async () => {
     try {
@@ -164,11 +185,16 @@ export default function WorkerProfile() {
         style={styles.logoutBtn}
         onPress={() => Alert.alert('Logout', 'Are you sure?', [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Logout', style: 'destructive', onPress: async () => { await clearAuth(); router.replace('/(auth)/phone'); } },
+          { text: 'Logout', style: 'destructive', onPress: () => { clearAuth(); router.replace('/(auth)/phone'); } },
         ])}
       >
         <Ionicons name="log-out-outline" size={16} color="#E74C3C" />
         <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteAccount}>
+        <Ionicons name="trash-outline" size={14} color="#999" />
+        <Text style={styles.deleteText}>Delete Account</Text>
       </TouchableOpacity>
 
       <Modal visible={editModal} animationType="slide" presentationStyle="pageSheet">
@@ -274,4 +300,6 @@ const styles = StyleSheet.create({
   verifyChipAmber: { backgroundColor: '#fff3cd', borderColor: '#ffc107' },
   verifyChipGrey: { backgroundColor: COLORS.card, borderColor: COLORS.border },
   verifyChipText: { fontSize: 12, fontWeight: '600', color: '#155724' },
+  deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginHorizontal: 16, marginTop: 4, padding: 12 },
+  deleteText: { color: '#999', fontSize: 13 },
 });

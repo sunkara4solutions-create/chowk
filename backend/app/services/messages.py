@@ -71,18 +71,24 @@ MSG = {
             "*You are registered on Chowk!* ✅\n\n"
             "Name: {name}\nSkill: {skill}\nCity: {city}\nDaily Rate: ₹{rate}\n\n"
             "You will receive job notifications when work is available in {city}.\n\n"
+            "📱 *Want more control?* Download the Chowk app to browse jobs, track applications and update your profile:\n"
+            "https://chowk.yourstockpicker.com\n\n"
             "Reply *STOP* to unsubscribe anytime."
         ),
         "te": (
             "*మీరు Chowk లో నమోదయ్యారు!* ✅\n\n"
             "పేరు: {name}\nనైపుణ్యం: {skill}\nనగరం: {city}\nరోజువారీ రేటు: ₹{rate}\n\n"
             "{city} లో పని అందుబాటులో ఉన్నప్పుడు మీకు నోటిఫికేషన్లు వస్తాయి.\n\n"
+            "📱 *యాప్ డౌన్‌లోడ్ చేయండి* — జాబ్‌లు చూడండి, అప్లికేషన్లు ట్రాక్ చేయండి:\n"
+            "https://chowk.yourstockpicker.com\n\n"
             "ఎప్పుడైనా *STOP* అని రిప్లై చేయండి."
         ),
         "hi": (
             "*आप Chowk पर पंजीकृत हो गए!* ✅\n\n"
             "नाम: {name}\nहुनर: {skill}\nशहर: {city}\nरोज़ की मजदूरी: ₹{rate}\n\n"
             "{city} में काम मिलने पर आपको सूचना मिलेगी।\n\n"
+            "📱 *ऐप डाउनलोड करें* — काम देखें, आवेदन ट्रैक करें:\n"
+            "https://chowk.yourstockpicker.com\n\n"
             "कभी भी *STOP* लिखकर अनसब्सक्राइब करें।"
         ),
     },

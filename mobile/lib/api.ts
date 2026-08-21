@@ -137,3 +137,5 @@ export const aadhaarVerifyNumber = (request_id: string, aadhaar_number: string, 
 
 export const aadhaarComplete = (request_id: string, otp: string, share_code = '1234') =>
   api.post('/mobile/aadhaar/complete', { request_id, otp, share_code });
+
+export const deleteAccount = () => api.delete('/mobile/account');

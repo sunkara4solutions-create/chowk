@@ -110,6 +110,60 @@ async def notify_jobs_background(job_ids: list[str]) -> None:
         db.close()
 
 
+async def notify_contractor_of_late_worker(worker_id: str) -> None:
+    """If a worker registers after a job date, notify the contractor they may still find a match."""
+    from app.database import SessionLocal
+    from datetime import date, timedelta
+    from app.models import JobStatus, SkillEnum, Contractor
+
+    db = SessionLocal()
+    try:
+        worker = db.query(Worker).filter(Worker.worker_id == worker_id).first()
+        if not worker:
+            return
+
+        worker_skills = [SkillEnum(s) for s in (worker.skills or [])]
+        if not worker_skills:
+            return
+
+        today = date.today()
+        two_days_ago = today - timedelta(days=2)
+
+        past_open_jobs = (
+            db.query(Job)
+            .filter(
+                Job.status == JobStatus.open,
+                Job.job_date >= two_days_ago,
+                Job.job_date < today,
+                Job.city.ilike(worker.city),
+                Job.skill.in_(worker_skills),
+            )
+            .all()
+        )
+
+        for job in past_open_jobs:
+            contractor = db.query(Contractor).filter(Contractor.contractor_id == job.contractor_id).first()
+            if not contractor:
+                continue
+            skill_label = SKILL_DISPLAY["en"].get(job.skill.value, job.skill.value.replace("_", " ").title())
+            msg = (
+                f"👷 *New Worker Available — {skill_label}*\n\n"
+                f"A worker just registered on Chowk who matches your job from {job.job_date.strftime('%d %B')}.\n\n"
+                f"*Worker:* {worker.name}\n"
+                f"*Skill:* {skill_label}\n"
+                f"*City:* {worker.city}\n"
+                f"*Rate:* ₹{worker.daily_rate}/day\n"
+                f"*Experience:* {worker.experience} yrs\n\n"
+                f"Are you still looking? Reply *YES* to get their contact or post a new job."
+            )
+            try:
+                await whatsapp_service.send_text(contractor.phone, msg)
+            except Exception as e:
+                logger.error("Failed to notify contractor %s of late worker: %s", contractor.phone, e)
+    finally:
+        db.close()
+
+
 async def notify_worker_of_existing_jobs(worker_id: str) -> None:
     """Notify a newly registered worker about open jobs from tomorrow onwards that match their skill+city."""
     from app.database import SessionLocal

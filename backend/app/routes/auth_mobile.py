@@ -129,8 +129,9 @@ async def register_worker(
     db.refresh(worker)
 
     if is_new:
-        from app.services.notification_service import notify_worker_of_existing_jobs
+        from app.services.notification_service import notify_worker_of_existing_jobs, notify_contractor_of_late_worker
         background_tasks.add_task(notify_worker_of_existing_jobs, str(worker.worker_id))
+        background_tasks.add_task(notify_contractor_of_late_worker, str(worker.worker_id))
 
     token = create_token({"sub": phone, "role": "worker"})
     return MobileTokenResponse(

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert,
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getContractorMe, updateContractorMe, getContractorJobs } from '../../lib/api';
+import { getContractorMe, updateContractorMe, getContractorJobs, deleteAccount } from '../../lib/api';
 import { useAuthStore } from '../../store/auth';
 import { COLORS } from '../../lib/config';
 import type { ContractorProfile, Job } from '../../lib/types';
@@ -41,6 +41,27 @@ export default function ContractorProfileScreen() {
     if (!profile) return;
     setForm({ name: profile.name, company_name: profile.company_name ?? '', city: profile.city });
     setEditModal(true);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your profile, jobs and all data. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive', onPress: async () => {
+            try {
+              await deleteAccount();
+              clearAuth();
+              router.replace('/(auth)/phone');
+            } catch {
+              Alert.alert('Error', 'Failed to delete account. Please try again.');
+            }
+          }
+        },
+      ]
+    );
   };
 
   const initials = profile?.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) ?? '?';
@@ -81,11 +102,16 @@ export default function ContractorProfileScreen() {
         style={styles.logoutBtn}
         onPress={() => Alert.alert('Logout', 'Are you sure?', [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Logout', style: 'destructive', onPress: async () => { await clearAuth(); router.replace('/(auth)/phone'); } },
+          { text: 'Logout', style: 'destructive', onPress: () => { clearAuth(); router.replace('/(auth)/phone'); } },
         ])}
       >
         <Ionicons name="log-out-outline" size={16} color="#E74C3C" />
         <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteAccount}>
+        <Ionicons name="trash-outline" size={14} color="#999" />
+        <Text style={styles.deleteText}>Delete Account</Text>
       </TouchableOpacity>
 
       <Modal visible={editModal} animationType="slide" presentationStyle="pageSheet">
@@ -166,6 +192,8 @@ const styles = StyleSheet.create({
   editBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginHorizontal: 16, marginTop: 8, padding: 14 },
   logoutText: { color: '#E74C3C', fontWeight: '600', fontSize: 15 },
+  deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginHorizontal: 16, marginTop: 4, padding: 12 },
+  deleteText: { color: '#999', fontSize: 13 },
   modal: { flex: 1, backgroundColor: COLORS.background, padding: 20 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   modalTitle: { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary },

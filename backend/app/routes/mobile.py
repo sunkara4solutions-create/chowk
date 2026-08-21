@@ -455,3 +455,36 @@ async def aadhaar_complete(
     db.commit()
 
     return {"verified": True, "aadhaar_last4": last4, "message": "Aadhaar verified successfully"}
+
+
+@router.delete("/account", status_code=200)
+def delete_account(
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_any_mobile_user),
+):
+    phone = payload.get("sub")
+    role = payload.get("role")
+
+    if role == "worker":
+        worker = db.query(Worker).filter(Worker.phone == phone).first()
+        if worker:
+            db.query(Notification).filter(Notification.worker_id == worker.worker_id).delete()
+            db.query(Application).filter(Application.worker_id == worker.worker_id).delete()
+            db.delete(worker)
+    elif role == "contractor":
+        from app.models import Contractor
+        contractor = db.query(Contractor).filter(Contractor.phone == phone).first()
+        if contractor:
+            for job in db.query(Job).filter(Job.contractor_id == contractor.contractor_id).all():
+                db.query(Notification).filter(Notification.job_id == job.job_id).delete()
+                db.query(Application).filter(Application.job_id == job.job_id).delete()
+                db.delete(job)
+            db.delete(contractor)
+
+    from app.models import WhatsAppSession, DeviceToken, OtpCode
+    db.query(WhatsAppSession).filter(WhatsAppSession.phone == phone).delete()
+    db.query(DeviceToken).filter(DeviceToken.phone == phone).delete()
+    db.query(OtpCode).filter(OtpCode.phone == phone).delete()
+    db.commit()
+
+    return {"message": "Account deleted successfully"}

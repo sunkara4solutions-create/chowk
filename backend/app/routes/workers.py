@@ -20,11 +20,12 @@ def list_workers(
     q = db.query(Worker).filter(Worker.is_active == True)
     if city:
         q = q.filter(Worker.city.ilike(f"%{city}%"))
-    if skill:
-        q = q.filter(Worker.skill == skill)
     if available is not None:
         q = q.filter(Worker.is_available == available)
-    return [WorkerOut.model_validate(w) for w in q.all()]
+    workers = q.all()
+    if skill:
+        workers = [w for w in workers if skill in (w.skills or [])]
+    return [WorkerOut.model_validate(w) for w in workers]
 
 
 @router.get("/{worker_id}", response_model=WorkerOut)

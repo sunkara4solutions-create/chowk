@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, date, time
 from sqlalchemy import (
-    Column, String, Integer, Boolean, DateTime, Date, Time,
+    Column, String, Integer, Float, Boolean, DateTime, Date, Time,
     ForeignKey, Text, Enum as SAEnum, UniqueConstraint, JSON
 )
 from sqlalchemy.dialects.postgresql import UUID
@@ -44,6 +44,9 @@ class NotificationStatus(str, enum.Enum):
 
 class BotState(str, enum.Enum):
     new = "new"
+    reg_language = "reg_language"
+    role_select = "role_select"
+    # Worker registration
     reg_name = "reg_name"
     reg_skill = "reg_skill"
     reg_experience = "reg_experience"
@@ -51,6 +54,12 @@ class BotState(str, enum.Enum):
     reg_city = "reg_city"
     registered = "registered"
     awaiting_job_response = "awaiting_job_response"
+    # Contractor registration + job posting
+    con_name = "con_name"
+    con_company = "con_company"
+    con_city = "con_city"
+    contractor = "contractor"
+    con_awaiting_confirm = "con_awaiting_confirm"
 
 
 class Worker(Base):
@@ -59,7 +68,7 @@ class Worker(Base):
     worker_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(100), nullable=False)
     phone = Column(String(15), unique=True, nullable=False, index=True)
-    skill = Column(SAEnum(SkillEnum), nullable=False)
+    skills = Column(JSON, nullable=False, default=list)
     city = Column(String(100), nullable=False, index=True)
     village = Column(String(100))
     experience = Column(Integer, default=0)
@@ -67,6 +76,14 @@ class Worker(Base):
     is_available = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
     state = Column(String(50), default="Andhra Pradesh")
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    phone_verified = Column(Boolean, default=True)
+    location_verified = Column(Boolean, default=False)
+    aadhaar_verified = Column(Boolean, default=False)
+    aadhaar_last4 = Column(String(4), nullable=True)
+    whatsapp_primary = Column(Boolean, default=False)
+    referral_source = Column(String(200), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -86,6 +103,11 @@ class Contractor(Base):
     state = Column(String(50), default="Andhra Pradesh")
     password_hash = Column(String(256), nullable=False)
     is_active = Column(Boolean, default=True)
+    phone_verified = Column(Boolean, default=True)
+    aadhaar_verified = Column(Boolean, default=False)
+    aadhaar_last4 = Column(String(4), nullable=True)
+    whatsapp_primary = Column(Boolean, default=False)
+    referral_source = Column(String(200), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     jobs = relationship("Job", back_populates="contractor")
@@ -163,4 +185,35 @@ class Admin(Base):
     phone = Column(String(15), unique=True, nullable=False)
     password_hash = Column(String(256), nullable=False)
     is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class ProcessedMessage(Base):
+    __tablename__ = "processed_messages"
+
+    message_id = Column(String(200), primary_key=True)
+    processed_at = Column(DateTime, default=datetime.utcnow)
+
+
+class DeviceToken(Base):
+    __tablename__ = "device_tokens"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    phone = Column(String(15), nullable=False, index=True)
+    token = Column(String(500), nullable=False)
+    platform = Column(String(10), default="android")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (UniqueConstraint("phone", "token", name="uq_phone_token"),)
+
+
+class OtpCode(Base):
+    __tablename__ = "otp_codes"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    phone = Column(String(20), nullable=False, index=True)
+    code = Column(String(6), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)

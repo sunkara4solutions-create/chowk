@@ -1,10 +1,10 @@
 """
 Matching engine: finds eligible workers for a job.
-Phase 1: skill + city exact match.
+Phase 1: skill (JSON list) + city exact match.
 Phase 2 (TODO): add radius-based geo matching with PostGIS.
 """
 from sqlalchemy.orm import Session
-from app.models import Worker, Notification, Application, SkillEnum
+from app.models import Worker, Notification, SkillEnum
 
 
 def find_matching_workers(db: Session, skill: SkillEnum, city: str, job_id) -> list[Worker]:
@@ -13,10 +13,9 @@ def find_matching_workers(db: Session, skill: SkillEnum, city: str, job_id) -> l
         .filter(Notification.job_id == job_id)
         .subquery()
     )
-    workers = (
+    candidates = (
         db.query(Worker)
         .filter(
-            Worker.skill == skill,
             Worker.city.ilike(city),
             Worker.is_available == True,
             Worker.is_active == True,
@@ -24,4 +23,4 @@ def find_matching_workers(db: Session, skill: SkillEnum, city: str, job_id) -> l
         )
         .all()
     )
-    return workers
+    return [w for w in candidates if skill.value in (w.skills or [])]

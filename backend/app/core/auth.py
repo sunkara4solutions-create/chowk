@@ -7,7 +7,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
-from app.models import Contractor, Admin
+from app.models import Contractor, Admin, Worker
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
@@ -61,3 +61,38 @@ def get_current_admin(
     if not admin or not admin.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not found")
     return admin
+
+
+def get_current_worker(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> Worker:
+    payload = _decode_token(credentials.credentials)
+    phone = payload.get("sub")
+    if not phone or payload.get("role") != "worker":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Worker access required")
+    worker = db.query(Worker).filter(Worker.phone == phone).first()
+    if not worker or not worker.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Worker not found")
+    return worker
+
+
+def get_mobile_contractor(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> Contractor:
+    payload = _decode_token(credentials.credentials)
+    phone = payload.get("sub")
+    if not phone or payload.get("role") != "contractor":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Contractor access required")
+    contractor = db.query(Contractor).filter(Contractor.phone == phone).first()
+    if not contractor or not contractor.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Contractor not found")
+    return contractor
+
+
+def get_any_mobile_user(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+) -> dict:
+    """Returns the raw JWT payload — used for endpoints accessible to both roles."""
+    return _decode_token(credentials.credentials)

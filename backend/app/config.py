@@ -18,9 +18,15 @@ class Settings(BaseSettings):
     META_ACCESS_TOKEN: str = ""
     META_WEBHOOK_VERIFY_TOKEN: str = "chowk_verify_token"
 
+    TWILIO_VERIFY_SID: str = ""  # Create at console.twilio.com → Verify → Services
+
     APP_NAME: str = "Chowk"
     APP_ENV: str = "development"
     FRONTEND_URL: str = "http://localhost:3000"
+
+    ANTHROPIC_API_KEY: str = ""
+
+    SENTRY_DSN: str = ""
 
     ADMIN_PHONE: str = "9999999999"
     ADMIN_PASSWORD: str = "changeme123"

@@ -10,6 +10,8 @@ from app.database import Base
 from app.models import *  # noqa: ensure all models are imported
 
 config = context.config
+if os.environ.get("DATABASE_URL"):
+    config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
 fileConfig(config.config_file_name)
 target_metadata = Base.metadata
 

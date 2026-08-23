@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, AppState, AppStateStatus } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +18,20 @@ export default function ContractorDashboard() {
   const { data: jobs = [], isLoading, refetch, isRefetching } = useQuery<Job[]>({
     queryKey: ['contractor-jobs'],
     queryFn: () => getContractorJobs().then(r => r.data),
+    refetchInterval: 30_000,
+    staleTime: 0,
   });
+
+  const appStateRef = useRef(AppState.currentState);
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
+      if (appStateRef.current.match(/inactive|background/) && next === 'active') {
+        refetch();
+      }
+      appStateRef.current = next;
+    });
+    return () => sub.remove();
+  }, [refetch]);
 
   const activeJobs = jobs.filter(j => j.status === 'open');
   const totalConfirmed = jobs.reduce((s, j) => s + j.confirmed_count, 0);

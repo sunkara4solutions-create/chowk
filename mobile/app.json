@@ -29,7 +29,8 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE"
+        "VIBRATE",
+        "POST_NOTIFICATIONS"
       ]
     },
     "web": {
@@ -42,6 +43,13 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "Chowk uses your location to verify you are in your registered city and to show nearby jobs."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#E85C1A"
         }
       ],
       "expo-asset",

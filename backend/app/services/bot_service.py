@@ -646,6 +646,21 @@ async def _handle_job_response(phone: str, text: str, session: WhatsAppSession, 
     db.commit()
 
 
+async def _send_expo_push(tokens: list[str], title: str, body: str) -> None:
+    import httpx
+    messages = [
+        {"to": t, "sound": "default", "title": title, "body": body, "data": {"type": "job_update"}}
+        for t in tokens
+    ]
+    async with httpx.AsyncClient() as client:
+        await client.post(
+            "https://exp.host/--/api/v2/push/send",
+            json=messages,
+            headers={"Content-Type": "application/json"},
+            timeout=10.0,
+        )
+
+
 async def _notify_contractor(job: Job, worker: Worker, fully_filled: bool, db: Session) -> None:
     try:
         contractor = job.contractor
@@ -680,7 +695,28 @@ async def _notify_contractor(job: Job, worker: Worker, fully_filled: bool, db: S
                 "worker_action": {"name": worker.name, "phone": worker.phone},
             }
     except Exception as e:
-        logger.error("Failed to notify contractor: %s", e)
+        logger.error("Failed to notify contractor via WhatsApp: %s", e)
+
+    # Send Expo push notification regardless of WhatsApp outcome
+    try:
+        contractor = job.contractor
+        if contractor:
+            from app.models import DeviceToken
+            tokens = db.query(DeviceToken).filter(DeviceToken.phone == contractor.phone).all()
+            if tokens:
+                skill_label = _skill_label(job.skill.value, "en")
+                if fully_filled:
+                    push_title = "Job Filled!"
+                    push_body = f"All {job.required_count} {skill_label}(s) confirmed for {job.city}"
+                else:
+                    push_title = "Worker Confirmed"
+                    push_body = (
+                        f"{worker.name} accepted your {skill_label} job "
+                        f"({job.confirmed_count}/{job.required_count}) in {job.city}"
+                    )
+                await _send_expo_push([tok.token for tok in tokens], push_title, push_body)
+    except Exception as e:
+        logger.error("Failed to send push notification to contractor: %s", e)
 
 
 async def _handle_worker_action(phone: str, text: str, action: dict,

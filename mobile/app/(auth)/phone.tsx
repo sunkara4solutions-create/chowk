@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ export default function PhoneScreen() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [countryIdx, setCountryIdx] = useState(0);
+  const sendingRef = useRef(false);
 
   const country = COUNTRY_CODES[countryIdx];
   const isValid = phone.replace(/\D/g, '').length === country.digits;
@@ -33,6 +34,7 @@ export default function PhoneScreen() {
   const cycleCountry = () => setCountryIdx(i => (i + 1) % COUNTRY_CODES.length);
 
   const handleSendOtp = async () => {
+    if (sendingRef.current) return;
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length !== country.digits) {
       Alert.alert('Invalid Number', `Please enter a valid ${country.digits}-digit number.`);
@@ -40,6 +42,7 @@ export default function PhoneScreen() {
     }
     // Send full E.164 number without leading +
     const e164 = country.code.replace('+', '') + cleanPhone;
+    sendingRef.current = true;
     setLoading(true);
     try {
       await sendOtp(e164);
@@ -49,6 +52,7 @@ export default function PhoneScreen() {
       Alert.alert('Error', msg);
     } finally {
       setLoading(false);
+      sendingRef.current = false;
     }
   };
 

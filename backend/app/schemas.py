@@ -193,6 +193,8 @@ class NearbyWorkerOut(BaseModel):
     daily_rate: int
     is_available: bool
     distance_km: Optional[float] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
     model_config = {"from_attributes": True}
 

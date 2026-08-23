@@ -395,6 +395,8 @@ def workers_nearby(
             daily_rate=w.daily_rate,
             is_available=w.is_available,
             distance_km=round(distance, 1) if distance else None,
+            latitude=w.latitude if distance else None,
+            longitude=w.longitude if distance else None,
         ))
 
     results.sort(key=lambda x: x.distance_km or 999)

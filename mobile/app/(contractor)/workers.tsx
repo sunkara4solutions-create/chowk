@@ -24,14 +24,18 @@ export default function FindWorkers() {
     })();
   }, []);
 
+  const RADIUS_KM = 50;
+
   const { data: workers = [], isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['workers-nearby', userLoc, selectedSkill],
     queryFn: () =>
       userLoc
-        ? getNearbyWorkers(userLoc.lat, userLoc.lng, 20, selectedSkill ?? undefined).then(r => r.data)
+        ? getNearbyWorkers(userLoc.lat, userLoc.lng, RADIUS_KM, selectedSkill ?? undefined).then(r => r.data)
         : Promise.resolve([]),
     enabled: !!userLoc,
   });
+
+  const mappableWorkers = workers.filter((w: any) => w.distance_km !== null && w.distance_km !== undefined);
 
   return (
     <View style={styles.container}>
@@ -59,7 +63,7 @@ export default function FindWorkers() {
       </ScrollView>
 
       <View style={styles.toggleRow}>
-        <Text style={styles.countText}>{workers.length} workers found nearby</Text>
+        <Text style={styles.countText}>{workers.length} workers within {RADIUS_KM} km</Text>
         <TouchableOpacity style={styles.toggleBtn} onPress={() => setShowMap(v => !v)}>
           <Text style={styles.toggleText}>{showMap ? 'List View' : 'Map View'}</Text>
         </TouchableOpacity>
@@ -67,12 +71,12 @@ export default function FindWorkers() {
 
       {showMap ? (
         <MapView style={styles.map} region={region} showsUserLocation>
-          {workers.map((w: any) => (
+          {mappableWorkers.map((w: any) => (
             <Marker
               key={w.worker_id}
-              coordinate={{ latitude: region.latitude + (Math.random() - 0.5) * 0.02, longitude: region.longitude + (Math.random() - 0.5) * 0.02 }}
+              coordinate={{ latitude: w.latitude, longitude: w.longitude }}
               title={w.name}
-              description={(w.skills ?? []).map((s: string) => SKILL_LABELS[s as keyof typeof SKILL_LABELS] ?? s).join(', ')}
+              description={`${(w.skills ?? []).map((s: string) => SKILL_LABELS[s as keyof typeof SKILL_LABELS] ?? s).join(', ')} · ${w.distance_km} km away`}
               pinColor={COLORS.secondary}
             />
           ))}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -16,22 +17,33 @@ import { router } from 'expo-router';
 import { COLORS } from '../../lib/config';
 import { sendOtp } from '../../lib/api';
 
+const COUNTRY_CODES = [
+  { code: '+91', flag: '🇮🇳', digits: 10 },
+  { code: '+1',  flag: '🇺🇸', digits: 10 },
+];
+
 export default function PhoneScreen() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [countryIdx, setCountryIdx] = useState(0);
 
-  const isValid = phone.replace(/\D/g, '').length === 10;
+  const country = COUNTRY_CODES[countryIdx];
+  const isValid = phone.replace(/\D/g, '').length === country.digits;
+
+  const cycleCountry = () => setCountryIdx(i => (i + 1) % COUNTRY_CODES.length);
 
   const handleSendOtp = async () => {
     const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length !== 10) {
-      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number.');
+    if (cleanPhone.length !== country.digits) {
+      Alert.alert('Invalid Number', `Please enter a valid ${country.digits}-digit number.`);
       return;
     }
+    // Send full E.164 number without leading +
+    const e164 = country.code.replace('+', '') + cleanPhone;
     setLoading(true);
     try {
-      await sendOtp(cleanPhone);
-      router.push({ pathname: '/(auth)/otp', params: { phone: cleanPhone } });
+      await sendOtp(e164);
+      router.push({ pathname: '/(auth)/otp', params: { phone: e164, display: `${country.code} ${cleanPhone}` } });
     } catch (err: any) {
       const msg = err?.response?.data?.detail || 'Failed to send OTP. Please try again.';
       Alert.alert('Error', msg);
@@ -47,11 +59,8 @@ export default function PhoneScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.logoArea}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoLetter}>C</Text>
-          </View>
-          <Text style={styles.appName}>Chowk</Text>
-          <Text style={styles.tagline}>Daily Work. Trusted Workers.</Text>
+          <Image source={require('../../assets/icon.png')} style={styles.logoImage} />
+          <Text style={styles.tagline}>Connecting Rural India</Text>
         </View>
 
         <View style={styles.formArea}>
@@ -59,15 +68,15 @@ export default function PhoneScreen() {
           <Text style={styles.subheading}>Enter your mobile number to get started</Text>
 
           <View style={styles.phoneInputRow}>
-            <View style={styles.prefix}>
-              <Text style={styles.prefixText}>+91</Text>
-            </View>
+            <TouchableOpacity style={styles.prefix} onPress={cycleCountry} activeOpacity={0.7}>
+              <Text style={styles.prefixText}>{country.flag} {country.code}</Text>
+            </TouchableOpacity>
             <TextInput
               style={styles.phoneInput}
-              placeholder="9876543210"
+              placeholder={country.digits === 10 ? '9876543210' : '2025550123'}
               placeholderTextColor={COLORS.textSecondary}
               keyboardType="phone-pad"
-              maxLength={10}
+              maxLength={country.digits}
               value={phone}
               onChangeText={(t) => setPhone(t.replace(/\D/g, ''))}
               autoFocus
@@ -113,30 +122,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 48,
   },
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  logoLetter: {
-    fontSize: 40,
-    fontWeight: '800',
-    color: '#fff',
-  },
-  appName: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: COLORS.secondary,
-    letterSpacing: 1,
+  logoImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 22,
+    marginBottom: 10,
   },
   tagline: {
     fontSize: 14,

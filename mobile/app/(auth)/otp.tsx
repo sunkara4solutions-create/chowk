@@ -17,7 +17,8 @@ import { useAuthStore } from '../../store/auth';
 import OTPInput from '../../components/OTPInput';
 
 export default function OtpScreen() {
-  const { phone } = useLocalSearchParams<{ phone: string }>();
+  const { phone, display } = useLocalSearchParams<{ phone: string; display: string }>();
+  const displayPhone = display || `+${phone}`;
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(60);
@@ -53,7 +54,7 @@ export default function OtpScreen() {
       await sendOtp(phone);
       setOtp('');
       startCountdown();
-      Alert.alert('OTP Sent', `A new OTP has been sent via SMS to +91 ${phone}`);
+      Alert.alert('OTP Sent', `A new OTP has been sent via SMS to ${displayPhone}`);
     } catch {
       Alert.alert('Error', 'Failed to resend OTP. Please try again.');
     }
@@ -100,7 +101,7 @@ export default function OtpScreen() {
         <Text style={styles.heading}>Enter OTP</Text>
         <Text style={styles.subheading}>
           We sent a 6-digit code via SMS to{'\n'}
-          <Text style={styles.phoneHighlight}>+91 {phone}</Text>
+          <Text style={styles.phoneHighlight}>{displayPhone}</Text>
         </Text>
 
         <OTPInput value={otp} onChange={setOtp} length={6} />

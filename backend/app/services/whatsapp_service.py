@@ -66,6 +66,30 @@ class WhatsAppService:
             resp.raise_for_status()
             return resp.json()["sid"]
 
+    async def send_template(self, phone: str, template_name: str, language: str, components: list) -> str:
+        """Send a Meta-approved template message (works outside 24-hour window)."""
+        url = f"https://graph.facebook.com/v19.0/{settings.META_PHONE_NUMBER_ID}/messages"
+        to_e164 = f"91{phone}" if len(phone) == 10 else phone
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": to_e164,
+            "type": "template",
+            "template": {
+                "name": template_name,
+                "language": {"code": language},
+                "components": components,
+            },
+        }
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                url,
+                json=payload,
+                headers={"Authorization": f"Bearer {settings.META_ACCESS_TOKEN}"},
+                timeout=10,
+            )
+            resp.raise_for_status()
+            return resp.json()["messages"][0]["id"]
+
     def parse_incoming_meta(self, payload: dict) -> IncomingMessage | None:
         try:
             entry = payload["entry"][0]["changes"][0]["value"]

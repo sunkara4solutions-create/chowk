@@ -1,14 +1,16 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../../lib/config';
 
 export default function ContractorLayout() {
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textSecondary,
-        tabBarStyle: { backgroundColor: COLORS.card, borderTopColor: COLORS.border, height: 60, paddingBottom: 8 },
+        tabBarStyle: { backgroundColor: COLORS.card, borderTopColor: COLORS.border, height: 56 + insets.bottom, paddingBottom: insets.bottom || 8 },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         headerStyle: { backgroundColor: COLORS.background },
         headerShadowVisible: false,

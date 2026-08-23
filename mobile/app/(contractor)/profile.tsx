@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, Modal, Platform, StatusBar } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -115,7 +115,7 @@ export default function ContractorProfileScreen() {
       </TouchableOpacity>
 
       <Modal visible={editModal} animationType="slide" presentationStyle="pageSheet">
-        <View style={styles.modal}>
+        <View style={[styles.modal, Platform.OS === 'android' && { paddingTop: (StatusBar.currentHeight ?? 0) + 20 }]}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Edit Profile</Text>
             <TouchableOpacity onPress={() => setEditModal(false)}>

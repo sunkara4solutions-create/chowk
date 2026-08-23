@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
-  RefreshControl, Modal, ScrollView, SafeAreaView,
+  RefreshControl, Modal, ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SKILLS, SKILL_LABELS, SKILL_EMOJIS, AP_CITIES } from '../../lib/config';
@@ -27,6 +28,7 @@ function slotsLeft(job: Job) {
 export default function JobFeed() {
   const { profile } = useAuthStore();
   const qc = useQueryClient();
+  const insets = useSafeAreaInsets();
   const [city, setCity] = useState<string>(profile?.city ?? '');
   const [skill, setSkill] = useState<string | null>(null);
   const [cityModal, setCityModal] = useState(false);
@@ -166,7 +168,7 @@ export default function JobFeed() {
       {/* City picker modal */}
       <Modal visible={cityModal} transparent animationType="slide">
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setCityModal(false)} />
-        <View style={styles.modalSheet}>
+        <View style={[styles.modalSheet, { paddingBottom: 16 + insets.bottom }]}>
           <View style={styles.modalHandle} />
           <Text style={styles.modalTitle}>Select City</Text>
           <ScrollView>

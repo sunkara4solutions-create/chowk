@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Alert, TextInput, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Alert, TextInput, Modal, Platform, StatusBar } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -198,7 +198,10 @@ export default function WorkerProfile() {
       </TouchableOpacity>
 
       <Modal visible={editModal} animationType="slide" presentationStyle="pageSheet">
-        <ScrollView style={styles.modal} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+        <ScrollView
+          style={styles.modal}
+          contentContainerStyle={{ padding: 20, paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) + 20 : 20, paddingBottom: 40 }}
+        >
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Edit Profile</Text>
             <TouchableOpacity onPress={() => setEditModal(false)}>

@@ -8,16 +8,26 @@ from app.models import SkillEnum, JobStatus, ApplicationStatus, NotificationStat
 
 # ─── Mobile Auth ──────────────────────────────────────────────────────────────
 
+def _normalize_phone(v: str) -> str:
+    """Accept 10-digit Indian, E.164 Indian (91XXXXXXXXXX/+91XXXXXXXXXX), or US (1XXXXXXXXXX)."""
+    digits = v.replace("+", "").replace(" ", "")
+    if not digits.isdigit():
+        raise ValueError("Phone must contain only digits")
+    # Strip 91 prefix from Indian E.164 (91 + 10 digits = 12)
+    if digits.startswith("91") and len(digits) == 12:
+        digits = digits[2:]
+    if len(digits) not in (10, 11):
+        raise ValueError("Invalid phone number format")
+    return digits
+
+
 class OtpRequest(BaseModel):
     phone: str
 
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, v):
-        digits = v.replace("+91", "").replace(" ", "")
-        if not digits.isdigit() or len(digits) != 10:
-            raise ValueError("Phone must be a 10-digit Indian number")
-        return digits
+        return _normalize_phone(v)
 
 
 class OtpVerify(BaseModel):
@@ -27,10 +37,7 @@ class OtpVerify(BaseModel):
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, v):
-        digits = v.replace("+91", "").replace(" ", "")
-        if not digits.isdigit() or len(digits) != 10:
-            raise ValueError("Phone must be a 10-digit Indian number")
-        return digits
+        return _normalize_phone(v)
 
 
 class WorkerRegister(BaseModel):
@@ -120,6 +127,15 @@ class JobCreateMobile(BaseModel):
     city: str
     start_time: Optional[time] = None
     description: Optional[str] = None
+
+    @field_validator("start_time", mode="before")
+    @classmethod
+    def parse_start_time(cls, v):
+        if not v:
+            return None
+        if isinstance(v, str) and v.count(":") == 1:
+            return v + ":00"  # "08:00" → "08:00:00" for Python ≤3.10 compat
+        return v
 
 
 class ContractorBasic(BaseModel):

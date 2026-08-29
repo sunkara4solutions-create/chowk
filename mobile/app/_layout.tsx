@@ -7,6 +7,7 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { useAuthStore } from '../store/auth';
 import { setAuthRedirect, registerDeviceToken } from '../lib/api';
+import { hasSeenOnboarding } from '../lib/storage';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -62,7 +63,9 @@ function RootLayoutNav() {
     if (isLoading) return;
 
     if (!token) {
-      router.replace('/(auth)/phone');
+      hasSeenOnboarding().then(seen => {
+        router.replace(seen ? '/(auth)/phone' : '/(onboarding)');
+      });
     } else if (role === 'new') {
       router.replace('/(setup)/role');
     } else if (role === 'worker') {
@@ -82,6 +85,7 @@ function RootLayoutNav() {
     <>
       <StatusBar style="auto" />
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(setup)" options={{ headerShown: false }} />
         <Stack.Screen name="(worker)" options={{ headerShown: false }} />

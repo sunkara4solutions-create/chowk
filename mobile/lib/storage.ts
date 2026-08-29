@@ -27,3 +27,13 @@ export async function removeAll(): Promise<void> {
   await SecureStore.deleteItemAsync(TOKEN_KEY);
   await SecureStore.deleteItemAsync(ROLE_KEY);
 }
+
+const ONBOARDING_KEY = 'chowk_onboarding_seen';
+
+export async function hasSeenOnboarding(): Promise<boolean> {
+  return !!(await SecureStore.getItemAsync(ONBOARDING_KEY));
+}
+
+export async function markOnboardingSeen(): Promise<void> {
+  await SecureStore.setItemAsync(ONBOARDING_KEY, '1');
+}

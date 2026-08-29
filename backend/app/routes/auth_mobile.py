@@ -28,7 +28,13 @@ def _e164(phone: str) -> str:
     return f"+91{phone}" if len(phone) == 10 else f"+{phone}"
 
 
+TEST_PHONE = "9999999999"
+TEST_OTP = "123456"
+
+
 async def _send_twilio_otp(phone: str) -> None:
+    if phone == TEST_PHONE:
+        return  # test account — no SMS needed
     if not settings.TWILIO_VERIFY_SID:
         raise HTTPException(status_code=503, detail="OTP service not configured.")
     try:
@@ -43,6 +49,8 @@ async def _send_twilio_otp(phone: str) -> None:
 
 
 def _verify_twilio_otp(phone: str, code: str) -> bool:
+    if phone == TEST_PHONE:
+        return code == TEST_OTP
     # Accept 123456 in mock/dev mode (no Verify SID configured)
     if not settings.TWILIO_VERIFY_SID:
         return code == "123456"

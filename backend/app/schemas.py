@@ -277,6 +277,7 @@ class ContractorOut(BaseModel):
     city: str
     business_type: Optional[str]
     phone_verified: bool = True
+    location_verified: bool = False
     aadhaar_verified: bool = False
     aadhaar_last4: Optional[str] = None
     whatsapp_primary: bool = False

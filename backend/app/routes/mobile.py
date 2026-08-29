@@ -97,6 +97,19 @@ def update_worker_preferences(
     return {"whatsapp_primary": worker.whatsapp_primary}
 
 
+@router.patch("/contractor/location", status_code=200)
+def update_contractor_location(
+    body: LocationUpdate,
+    db: Session = Depends(get_db),
+    contractor: Contractor = Depends(get_mobile_contractor),
+):
+    contractor.latitude = body.latitude
+    contractor.longitude = body.longitude
+    contractor.location_verified = body.city_verified
+    db.commit()
+    return {"message": "Location updated", "location_verified": body.city_verified}
+
+
 @router.patch("/contractor/preferences", status_code=200)
 def update_contractor_preferences(
     body: WorkerPreferences,

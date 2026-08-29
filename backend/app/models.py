@@ -108,6 +108,9 @@ class Contractor(Base):
     aadhaar_last4 = Column(String(4), nullable=True)
     whatsapp_primary = Column(Boolean, default=False)
     referral_source = Column(String(200), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    location_verified = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     jobs = relationship("Job", back_populates="contractor")

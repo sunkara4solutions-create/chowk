@@ -78,6 +78,9 @@ export const updateWorkerMe = (data: {
 export const updateWorkerLocation = (latitude: number, longitude: number, city_verified = false) =>
   api.patch('/mobile/worker/location', { latitude, longitude, city_verified });
 
+export const updateContractorLocation = (latitude: number, longitude: number, city_verified = false) =>
+  api.patch('/mobile/contractor/location', { latitude, longitude, city_verified });
+
 export const setWorkerPreferences = (data: { whatsapp_primary?: boolean; referral_source?: string }) =>
   api.patch('/mobile/worker/preferences', data);
 
@@ -139,3 +142,37 @@ export const aadhaarComplete = (request_id: string, otp: string, share_code = '1
   api.post('/mobile/aadhaar/complete', { request_id, otp, share_code });
 
 export const deleteAccount = () => api.delete('/mobile/account');
+
+// Individual jobs
+export const postIndividualJob = (data: {
+  title: string;
+  skill: string;
+  job_date: string;
+  rate?: number;
+  location: string;
+  city: string;
+  description?: string;
+}) => api.post('/mobile/individual/jobs', data);
+
+export const getIndividualJobs = (params?: { skill?: string; city?: string; page?: number }) =>
+  api.get('/mobile/individual/jobs', { params });
+
+export const getMyPostedJobs = () => api.get('/mobile/individual/my-jobs');
+
+export const getIndividualJob = (job_id: string) =>
+  api.get(`/mobile/individual/jobs/${job_id}`);
+
+export const placeBid = (job_id: string, amount: number, message?: string) =>
+  api.post(`/mobile/individual/jobs/${job_id}/bid`, { amount, message });
+
+export const acceptBid = (job_id: string, bid_id: string) =>
+  api.post(`/mobile/individual/jobs/${job_id}/bids/${bid_id}/accept`);
+
+export const markJobComplete = (job_id: string) =>
+  api.post(`/mobile/individual/jobs/${job_id}/complete`);
+
+export const leaveReview = (job_id: string, rating: number, comment?: string) =>
+  api.post(`/mobile/individual/jobs/${job_id}/review`, { rating, comment });
+
+export const getWorkerReviews = (worker_id: string) =>
+  api.get(`/mobile/individual/workers/${worker_id}/reviews`);

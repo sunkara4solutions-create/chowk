@@ -6,10 +6,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { COLORS, SKILLS, SKILL_LABELS, SKILL_EMOJIS, AP_CITIES } from '../../lib/config';
-import { getJobs, applyToJob } from '../../lib/api';
+import { getJobs, applyToJob, getWorkerMe } from '../../lib/api';
 import { useAuthStore } from '../../store/auth';
-import type { Job } from '../../lib/types';
+import type { Job, Worker } from '../../lib/types';
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
@@ -33,6 +34,11 @@ export default function JobFeed() {
   const [skill, setSkill] = useState<string | null>(null);
   const [cityModal, setCityModal] = useState(false);
   const [applyingId, setApplyingId] = useState<string | null>(null);
+
+  const { data: worker } = useQuery<Worker>({
+    queryKey: ['worker-me'],
+    queryFn: () => getWorkerMe().then(r => r.data),
+  });
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['jobs', skill, city],
@@ -90,6 +96,21 @@ export default function JobFeed() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {worker && !worker.location_verified && (
+        <TouchableOpacity style={styles.infoBanner} onPress={() => router.push('/(worker)/profile')} activeOpacity={0.85}>
+          <Ionicons name="location-outline" size={16} color="#856404" />
+          <Text style={styles.infoBannerText}>Verify your location to appear in contractor search</Text>
+          <Ionicons name="chevron-forward" size={14} color="#856404" />
+        </TouchableOpacity>
+      )}
+      {worker && !worker.whatsapp_primary && (
+        <TouchableOpacity style={styles.waBanner} onPress={() => router.push('/(setup)/whatsapp-choice')} activeOpacity={0.85}>
+          <Ionicons name="logo-whatsapp" size={16} color="#25D366" />
+          <Text style={styles.waBannerText}>Connect WhatsApp to get job alerts</Text>
+          <Ionicons name="chevron-forward" size={14} color="#155724" />
+        </TouchableOpacity>
+      )}
 
       <FlatList
         data={jobs}
@@ -213,6 +234,10 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   chipText: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '600' },
   chipTextActive: { color: '#fff' },
+  infoBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#fff3cd', borderBottomWidth: 1, borderBottomColor: '#ffc107', paddingHorizontal: 14, paddingVertical: 10 },
+  infoBannerText: { flex: 1, fontSize: 12, fontWeight: '600', color: '#856404' },
+  waBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#E8F9EE', borderBottomWidth: 1, borderBottomColor: '#c3e6cb', paddingHorizontal: 14, paddingVertical: 10 },
+  waBannerText: { flex: 1, fontSize: 12, fontWeight: '600', color: '#155724' },
   empty: { alignItems: 'center', paddingTop: 72 },
   emptyIcon: { fontSize: 40, marginBottom: 12 },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 6 },

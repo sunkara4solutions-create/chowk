@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert,
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getContractorMe, updateContractorMe, getContractorJobs, deleteAccount } from '../../lib/api';
+import * as Location from 'expo-location';
+import { getContractorMe, updateContractorMe, updateContractorLocation, getContractorJobs, deleteAccount } from '../../lib/api';
 import { useAuthStore } from '../../store/auth';
 import { COLORS } from '../../lib/config';
 import type { ContractorProfile, Job } from '../../lib/types';
@@ -36,6 +37,36 @@ export default function ContractorProfileScreen() {
     },
     onError: (e: any) => Alert.alert('Error', e.response?.data?.detail ?? 'Failed to update'),
   });
+
+  const handleVerifyLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please allow location access to verify your location.');
+        return;
+      }
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const geo = await Location.reverseGeocodeAsync(loc.coords);
+      const geocodedCity = [geo[0]?.city, geo[0]?.district, geo[0]?.subregion]
+        .filter(Boolean).join(' ').toLowerCase();
+      const profileCity = (profile?.city ?? '').toLowerCase();
+      const cityMatch = profileCity.split(' ').some(w => w.length > 2 && geocodedCity.includes(w));
+
+      await updateContractorLocation(loc.coords.latitude, loc.coords.longitude, cityMatch);
+      qc.invalidateQueries({ queryKey: ['contractor-me'] });
+
+      if (!cityMatch && geo[0]?.city) {
+        Alert.alert(
+          'Location Not Verified',
+          `Your GPS shows ${geo[0].city} but your profile says ${profile?.city}.\n\nUpdate your city in Edit Profile to match your actual location.`
+        );
+      } else if (cityMatch) {
+        Alert.alert('Verified ✅', 'Your location matches your city.');
+      }
+    } catch {
+      Alert.alert('Error', 'Could not capture location. Please try again.');
+    }
+  };
 
   const handleEditOpen = () => {
     if (!profile) return;
@@ -91,6 +122,38 @@ export default function ContractorProfileScreen() {
           <DetailRow icon="location-outline" label="City" value={profile?.city ?? ''} />
           <DetailRow icon="calendar-outline" label="Member Since" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : ''} />
         </View>
+      </View>
+
+      <View style={styles.verifyRow}>
+        <View style={[styles.verifyChip, styles.verifyChipGreen]}>
+          <Ionicons name="call-outline" size={13} color="#155724" />
+          <Text style={styles.verifyChipText}>Phone Verified</Text>
+        </View>
+        {profile?.location_verified ? (
+          <View style={[styles.verifyChip, styles.verifyChipGreen]}>
+            <Ionicons name="location-outline" size={13} color="#155724" />
+            <Text style={styles.verifyChipText}>Location Verified</Text>
+          </View>
+        ) : (
+          <TouchableOpacity style={[styles.verifyChip, styles.verifyChipAmber]} onPress={handleVerifyLocation}>
+            <Ionicons name="location-outline" size={13} color="#856404" />
+            <Text style={[styles.verifyChipText, { color: '#856404' }]}>Verify Location</Text>
+          </TouchableOpacity>
+        )}
+        {profile?.whatsapp_primary ? (
+          <View style={[styles.verifyChip, styles.verifyChipGreen]}>
+            <Ionicons name="logo-whatsapp" size={13} color="#155724" />
+            <Text style={styles.verifyChipText}>WhatsApp On</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[styles.verifyChip, styles.verifyChipAmber]}
+            onPress={() => router.push('/(setup)/whatsapp-choice')}
+          >
+            <Ionicons name="logo-whatsapp" size={13} color="#856404" />
+            <Text style={[styles.verifyChipText, { color: '#856404' }]}>Try WhatsApp</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <TouchableOpacity style={styles.editBtn} onPress={handleEditOpen}>
@@ -194,6 +257,11 @@ const styles = StyleSheet.create({
   logoutText: { color: '#E74C3C', fontWeight: '600', fontSize: 15 },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginHorizontal: 16, marginTop: 4, padding: 12 },
   deleteText: { color: '#999', fontSize: 13 },
+  verifyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginHorizontal: 16, marginBottom: 12 },
+  verifyChip: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+  verifyChipGreen: { backgroundColor: '#d4edda', borderColor: '#c3e6cb' },
+  verifyChipAmber: { backgroundColor: '#fff3cd', borderColor: '#ffc107' },
+  verifyChipText: { fontSize: 12, fontWeight: '600', color: '#155724' },
   modal: { flex: 1, backgroundColor: COLORS.background, padding: 20 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   modalTitle: { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary },

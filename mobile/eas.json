@@ -11,11 +11,17 @@
       "android": {
         "buildType": "apk",
         "distribution": "internal"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://chowk.yourstockpicker.com"
       }
     },
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://chowk.yourstockpicker.com"
       }
     }
   },

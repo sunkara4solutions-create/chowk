@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, AppState, AppStateStatus } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, AppState, AppStateStatus, Linking } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -43,6 +43,14 @@ export default function ContractorDashboard() {
         <Text style={styles.greetText}>Hello, {profile?.name?.split(' ')[0] ?? 'there'} 👋</Text>
         <Text style={styles.greetSub}>{profile?.city ?? ''}</Text>
       </View>
+
+      {profile && !profile.whatsapp_primary && (
+        <TouchableOpacity style={styles.waBanner} onPress={() => router.push('/(setup)/whatsapp-choice')} activeOpacity={0.85}>
+          <Ionicons name="logo-whatsapp" size={18} color="#25D366" />
+          <Text style={styles.waBannerText}>Connect WhatsApp for instant job alerts</Text>
+          <Ionicons name="chevron-forward" size={16} color={COLORS.textSecondary} />
+        </TouchableOpacity>
+      )}
 
       <View style={styles.statsRow}>
         <StatCard label="Active Jobs" value={activeJobs.length} color={COLORS.success} />
@@ -124,6 +132,8 @@ const styles = StyleSheet.create({
   statCard: { flex: 1, backgroundColor: COLORS.card, borderRadius: 10, padding: 12, elevation: 2 },
   statValue: { fontSize: 22, fontWeight: '800' },
   statLabel: { fontSize: 11, color: COLORS.textSecondary, marginTop: 2 },
+  waBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#E8F9EE', borderBottomWidth: 1, borderBottomColor: '#c3e6cb', paddingHorizontal: 16, paddingVertical: 12 },
+  waBannerText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#155724' },
   sectionTitle: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginHorizontal: 16, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   jobCard: { backgroundColor: COLORS.card, borderRadius: 12, padding: 14, marginHorizontal: 16, marginVertical: 5, elevation: 2 },
   jobHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },

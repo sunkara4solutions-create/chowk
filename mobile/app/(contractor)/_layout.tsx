@@ -42,6 +42,14 @@ export default function ContractorLayout() {
         }}
       />
       <Tabs.Screen
+        name="hire"
+        options={{
+          title: 'Small Jobs',
+          tabBarIcon: ({ color, size }) => <Ionicons name="hammer-outline" size={size} color={color} />,
+          headerTitle: 'Post Small Jobs',
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
@@ -50,6 +58,8 @@ export default function ContractorLayout() {
         }}
       />
       <Tabs.Screen name="job/[id]" options={{ href: null }} />
+      <Tabs.Screen name="post-individual-job" options={{ href: null, headerTitle: 'Post a Small Job' }} />
+      <Tabs.Screen name="individual-job/[id]" options={{ href: null, headerTitle: 'Job Details' }} />
     </Tabs>
   );
 }

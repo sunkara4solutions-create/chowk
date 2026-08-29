@@ -52,6 +52,16 @@ export default function WorkerLayout() {
         }}
       />
       <Tabs.Screen
+        name="hire"
+        options={{
+          title: 'Hire',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="hammer-outline" size={size} color={color} />
+          ),
+          headerTitle: 'Hire & Post Jobs',
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
@@ -61,12 +71,9 @@ export default function WorkerLayout() {
           headerTitle: 'My Profile',
         }}
       />
-      <Tabs.Screen
-        name="job/[id]"
-        options={{
-          href: null,
-        }}
-      />
+      <Tabs.Screen name="job/[id]" options={{ href: null }} />
+      <Tabs.Screen name="post-individual-job" options={{ href: null, headerTitle: 'Post a Job' }} />
+      <Tabs.Screen name="individual-job/[id]" options={{ href: null, headerTitle: 'Job Details' }} />
     </Tabs>
   );
 }

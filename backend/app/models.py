@@ -87,8 +87,13 @@ class Worker(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    average_rating = Column(Float, nullable=True)
+    review_count = Column(Integer, default=0)
+
     applications = relationship("Application", back_populates="worker")
     notifications = relationship("Notification", back_populates="worker")
+    bids = relationship("Bid", back_populates="worker")
+    reviews = relationship("Review", back_populates="worker")
 
 
 class Contractor(Base):
@@ -120,12 +125,17 @@ class Job(Base):
     __tablename__ = "jobs"
 
     job_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    contractor_id = Column(UUID(as_uuid=True), ForeignKey("contractors.contractor_id"), nullable=False)
+    contractor_id = Column(UUID(as_uuid=True), ForeignKey("contractors.contractor_id"), nullable=True)
+    # individual job fields (job_type='individual')
+    job_type = Column(String(20), default='contractor', nullable=False)
+    poster_phone = Column(String(15), nullable=True)
+    poster_name = Column(String(100), nullable=True)
+    title = Column(String(200), nullable=True)
     skill = Column(SAEnum(SkillEnum), nullable=False)
     required_count = Column(Integer, nullable=False)
     confirmed_count = Column(Integer, default=0)
     job_date = Column(Date, nullable=False)
-    rate = Column(Integer, nullable=False)
+    rate = Column(Integer, nullable=False, default=0)
     location = Column(String(300), nullable=False)
     city = Column(String(100), nullable=False, index=True)
     start_time = Column(Time)
@@ -137,6 +147,40 @@ class Job(Base):
     contractor = relationship("Contractor", back_populates="jobs")
     applications = relationship("Application", back_populates="job")
     notifications = relationship("Notification", back_populates="job")
+    bids = relationship("Bid", back_populates="job")
+
+    @property
+    def bid_count(self) -> int:
+        return len(self.bids)
+
+
+class Bid(Base):
+    __tablename__ = "bids"
+
+    bid_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    job_id = Column(UUID(as_uuid=True), ForeignKey("jobs.job_id"), nullable=False)
+    worker_id = Column(UUID(as_uuid=True), ForeignKey("workers.worker_id"), nullable=False)
+    amount = Column(Integer, nullable=False)
+    message = Column(Text, nullable=True)
+    status = Column(String(20), default='pending', nullable=False)  # pending | accepted | rejected
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    job = relationship("Job", back_populates="bids")
+    worker = relationship("Worker", back_populates="bids")
+
+
+class Review(Base):
+    __tablename__ = "reviews"
+
+    review_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    job_id = Column(UUID(as_uuid=True), ForeignKey("jobs.job_id"), nullable=False)
+    worker_id = Column(UUID(as_uuid=True), ForeignKey("workers.worker_id"), nullable=False)
+    reviewer_phone = Column(String(15), nullable=False)
+    rating = Column(Integer, nullable=False)  # 1–5
+    comment = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    worker = relationship("Worker", back_populates="reviews")
 
 
 class Application(Base):

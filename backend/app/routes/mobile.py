@@ -136,7 +136,11 @@ def job_feed(
     worker: Worker = Depends(get_current_worker),
 ):
     today = date.today()
-    q = db.query(Job).filter(Job.status == JobStatus.open, Job.job_date >= today)
+    q = db.query(Job).filter(
+        Job.job_type == 'contractor',
+        Job.status == JobStatus.open,
+        Job.job_date >= today,
+    )
 
     if city:
         q = q.filter(Job.city.ilike(f"%{city}%"))

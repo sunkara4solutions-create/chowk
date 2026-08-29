@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from app.config import settings
 from app.database import engine
 from app.models import Base
-from app.routes import contractors, jobs, workers, whatsapp, admin, auth_mobile, mobile
+from app.routes import contractors, jobs, workers, whatsapp, admin, auth_mobile, mobile, individual
 from app.core.auth import hash_password
 
 if settings.SENTRY_DSN:
@@ -32,6 +32,7 @@ app.include_router(whatsapp.router)
 app.include_router(admin.router)
 app.include_router(auth_mobile.router)
 app.include_router(mobile.router)
+app.include_router(individual.router)
 
 
 @app.on_event("startup")

@@ -148,7 +148,10 @@ class ContractorBasic(BaseModel):
 
 class JobOutMobile(BaseModel):
     job_id: UUID
-    contractor_id: UUID
+    contractor_id: Optional[UUID] = None
+    job_type: str = 'contractor'
+    poster_name: Optional[str] = None
+    title: Optional[str] = None
     skill: SkillEnum
     required_count: int
     confirmed_count: int
@@ -156,8 +159,8 @@ class JobOutMobile(BaseModel):
     rate: int
     location: str
     city: str
-    start_time: Optional[time]
-    description: Optional[str]
+    start_time: Optional[time] = None
+    description: Optional[str] = None
     status: JobStatus
     created_at: datetime
     contractor: Optional[ContractorBasic] = None
@@ -234,6 +237,8 @@ class WorkerOut(BaseModel):
     aadhaar_verified: bool = False
     aadhaar_last4: Optional[str] = None
     whatsapp_primary: bool = False
+    average_rating: Optional[float] = None
+    review_count: int = 0
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -376,3 +381,72 @@ class AdminStats(BaseModel):
     total_jobs: int
     jobs_today: int
     workers_available: int
+
+
+# ─── Individual Jobs / Bids / Reviews ────────────────────────────────────────
+
+class IndividualJobCreate(BaseModel):
+    title: str
+    skill: SkillEnum
+    job_date: date
+    rate: Optional[int] = None
+    location: str
+    city: str
+    description: Optional[str] = None
+
+
+class IndividualJobOut(BaseModel):
+    job_id: UUID
+    job_type: str
+    poster_name: Optional[str] = None
+    title: Optional[str] = None
+    skill: SkillEnum
+    job_date: date
+    rate: int
+    location: str
+    city: str
+    description: Optional[str] = None
+    status: JobStatus
+    bid_count: int = 0
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class WorkerBrief(BaseModel):
+    worker_id: UUID
+    name: str
+    city: str
+    skills: List[str]
+    experience: int
+    average_rating: Optional[float] = None
+    review_count: int = 0
+
+    model_config = {"from_attributes": True}
+
+
+class BidCreate(BaseModel):
+    amount: int
+    message: Optional[str] = None
+
+
+class BidOut(BaseModel):
+    bid_id: UUID
+    job_id: UUID
+    amount: int
+    message: Optional[str] = None
+    status: str
+    created_at: datetime
+    worker: WorkerBrief
+
+    model_config = {"from_attributes": True}
+
+
+class IndividualJobDetail(IndividualJobOut):
+    bids: List[BidOut] = []
+    is_poster: bool = False
+
+
+class ReviewCreate(BaseModel):
+    rating: int
+    comment: Optional[str] = None

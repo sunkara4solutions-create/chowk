@@ -20,6 +20,9 @@
       "android": {
         "buildType": "app-bundle"
       },
+      "ios": {
+        "distribution": "store"
+      },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://chowk.yourstockpicker.com"
       }

@@ -11,7 +11,7 @@ Contractor flow:
 """
 import logging
 import uuid
-from datetime import datetime, date as date_type, time as time_type
+from datetime import datetime, date as date_type, time as time_type, timedelta
 from fastapi import BackgroundTasks
 from sqlalchemy.orm import Session
 
@@ -222,6 +222,12 @@ async def handle_incoming(phone: str, body: str, db: Session, background_tasks: 
         return
 
     if state == BotState.registered:
+        if text.upper() == "HIRE":
+            session.context = {"lang": lang, "hire_return_state": "registered"}
+            session.bot_state = BotState.hire_title
+            db.commit()
+            await whatsapp_service.send_text(phone, t("hire_ask_title", lang))
+            return
         if text.upper() == "AVAILABLE":
             worker = db.query(Worker).filter(Worker.phone == phone).first()
             if worker:
@@ -285,6 +291,94 @@ async def handle_incoming(phone: str, body: str, db: Session, background_tasks: 
         await _handle_job_confirm(phone, text, session, lang, db, background_tasks)
         return
 
+    # ── Hire flow (individual job posting — worker or contractor) ─────────
+    if state == BotState.hire_title:
+        if len(text.strip()) < 3:
+            await whatsapp_service.send_text(phone, t("hire_title_invalid", lang))
+            return
+        session.context = {**session.context, "hire_title": text.strip()}
+        session.bot_state = BotState.hire_skill
+        db.commit()
+        await whatsapp_service.send_text(phone, t("hire_ask_skill", lang))
+        return
+
+    if state == BotState.hire_skill:
+        skill = SKILL_MAP.get(text.strip())
+        if not skill:
+            await whatsapp_service.send_text(phone, t("hire_skill_invalid", lang))
+            return
+        session.context = {**session.context, "hire_skill": skill.value}
+        session.bot_state = BotState.hire_date
+        db.commit()
+        await whatsapp_service.send_text(phone, t("hire_ask_date", lang))
+        return
+
+    if state == BotState.hire_date:
+        parsed_date = _parse_hire_date(text)
+        if not parsed_date:
+            await whatsapp_service.send_text(phone, t("hire_date_invalid", lang))
+            return
+        session.context = {**session.context, "hire_date": parsed_date.isoformat()}
+        session.bot_state = BotState.hire_location
+        db.commit()
+        await whatsapp_service.send_text(phone, t("hire_ask_location", lang))
+        return
+
+    if state == BotState.hire_location:
+        if len(text.strip()) < 3:
+            await whatsapp_service.send_text(phone, t("hire_location_invalid", lang))
+            return
+        session.context = {**session.context, "hire_location": text.strip()}
+        session.bot_state = BotState.hire_city
+        db.commit()
+        cities_list = "\n".join(f"{i+1}. {c}" for i, c in enumerate(AP_CITIES))
+        await whatsapp_service.send_text(phone, t("hire_ask_city", lang, cities=cities_list))
+        return
+
+    if state == BotState.hire_city:
+        city = _resolve_city(text)
+        session.context = {**session.context, "hire_city": city}
+        session.bot_state = BotState.hire_rate
+        db.commit()
+        await whatsapp_service.send_text(phone, t("hire_ask_rate", lang))
+        return
+
+    if state == BotState.hire_rate:
+        if text.strip().upper() == "SKIP":
+            rate = None
+        else:
+            digits = "".join(c for c in text if c.isdigit())
+            if not digits:
+                await whatsapp_service.send_text(phone, t("hire_rate_invalid", lang))
+                return
+            rate = int(digits)
+        session.context = {**session.context, "hire_rate": rate}
+        session.bot_state = BotState.hire_confirm
+        db.commit()
+        await whatsapp_service.send_text(phone, _hire_confirmation_text(session.context, lang))
+        return
+
+    if state == BotState.hire_confirm:
+        upper = text.strip().upper()
+        if upper not in ("YES", "NO", "Y", "N"):
+            await whatsapp_service.send_text(phone, t("hire_confirm_invalid", lang))
+            return
+
+        return_state = BotState(session.context.get("hire_return_state", "registered"))
+        if upper in ("NO", "N"):
+            session.bot_state = return_state
+            session.context = {"lang": lang}
+            db.commit()
+            await whatsapp_service.send_text(phone, t("hire_cancelled", lang))
+            return
+
+        _create_individual_job(phone, session.context, db)
+        session.bot_state = return_state
+        session.context = {"lang": lang}
+        db.commit()
+        await whatsapp_service.send_text(phone, t("hire_posted", lang))
+        return
+
     # Fallback
     await whatsapp_service.send_text(phone, t("fallback", lang))
 
@@ -321,7 +415,11 @@ def _build_contractor_welcome(contractor: Contractor, lang: str, db: Session) ->
     else:
         jobs_block = {"en": "No active postings.", "te": "క్రియాశీల పోస్టింగ్‌లు లేవు.", "hi": "कोई सक्रिय पोस्टिंग नहीं।"}.get(lang, "No active postings.")
 
-    post_hint = {"en": "Type your requirement to post a new job.", "te": "కొత్త పని పోస్ట్ చేయడానికి మీ అవసరాన్ని టైప్ చేయండి.", "hi": "नया काम पोस्ट करने के लिए अपनी ज़रूरत लिखें।"}.get(lang, "Type your requirement to post a new job.")
+    post_hint = {
+        "en": "Type your requirement to post a new job, or reply *HIRE* for a quick one-off task.",
+        "te": "కొత్త పని పోస్ట్ చేయడానికి మీ అవసరాన్ని టైప్ చేయండి, లేదా చిన్న పని కోసం *HIRE* అని రిప్లై చేయండి.",
+        "hi": "नया काम पोस्ट करने के लिए अपनी ज़रूरत लिखें, या छोटे काम के लिए *HIRE* लिखें।",
+    }.get(lang, "Type your requirement to post a new job, or reply *HIRE* for a quick one-off task.")
     header = {"en": f"Welcome back, {contractor.name}! 👋", "te": f"తిరిగి స్వాగతం, {contractor.name}! 👋", "hi": f"वापसी पर स्वागत है, {contractor.name}! 👋"}.get(lang, f"Welcome back, {contractor.name}! 👋")
     jobs_label = {"en": "Your active jobs:", "te": "మీ క్రియాశీల జాబ్‌లు:", "hi": "आपके सक्रिय काम:"}.get(lang, "Your active jobs:")
 
@@ -348,6 +446,13 @@ async def _handle_contractor_message(
     collecting = session.context.get("collecting_field")
     if ctx_jobs and collecting:
         await _merge_missing_field(phone, text, collecting, ctx_jobs, session, lang, db)
+        return
+
+    if text.strip().upper() == "HIRE":
+        session.context = {"lang": lang, "hire_return_state": "contractor"}
+        session.bot_state = BotState.hire_title
+        db.commit()
+        await whatsapp_service.send_text(phone, t("hire_ask_title", lang))
         return
 
     # Single Claude call: intent + job extraction
@@ -770,3 +875,78 @@ def _resolve_city(text: str) -> str:
         if city.lower() == text_lower or city.lower().startswith(text_lower[:4]):
             return city
     return text.strip().title()
+
+
+def _parse_hire_date(text: str) -> date_type | None:
+    cleaned = text.strip().lower()
+    today = date_type.today()
+    if cleaned == "today":
+        return today
+    if cleaned == "tomorrow":
+        return today + timedelta(days=1)
+    for fmt in ("%d-%m-%Y", "%d/%m/%Y", "%d-%m-%y", "%d/%m/%y"):
+        try:
+            return datetime.strptime(text.strip(), fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def _hire_confirmation_text(ctx: dict, lang: str) -> str:
+    skill_label = _skill_label(ctx["hire_skill"], lang)
+    job_date = date_type.fromisoformat(ctx["hire_date"])
+    date_str = job_date.strftime("%d %b %Y")
+    rate = ctx.get("hire_rate")
+    if rate:
+        rate_str = f"₹{rate}/day"
+    else:
+        rate_str = {
+            "en": "Open (workers will quote)",
+            "te": "ఓపెన్ (కార్మికులు రేటు చెబుతారు)",
+            "hi": "खुला (मजदूर रेट बताएंगे)",
+        }.get(lang, "Open (workers will quote)")
+
+    msgs = {
+        "en": (
+            f"📋 *Confirm Job*\n\n{ctx['hire_title']}\n\n"
+            f"Type: {skill_label}\nDate: {date_str}\nLocation: {ctx['hire_location']}, {ctx['hire_city']}\n"
+            f"Budget: {rate_str}\n\nReply *YES* to post | *NO* to cancel"
+        ),
+        "te": (
+            f"📋 *పని నిర్ధారించండి*\n\n{ctx['hire_title']}\n\n"
+            f"రకం: {skill_label}\nతేదీ: {date_str}\nస్థలం: {ctx['hire_location']}, {ctx['hire_city']}\n"
+            f"బడ్జెట్: {rate_str}\n\n*YES* పోస్ట్ చేయడానికి | *NO* రద్దు చేయడానికి"
+        ),
+        "hi": (
+            f"📋 *काम की पुष्टि करें*\n\n{ctx['hire_title']}\n\n"
+            f"प्रकार: {skill_label}\nतारीख: {date_str}\nस्थान: {ctx['hire_location']}, {ctx['hire_city']}\n"
+            f"बजट: {rate_str}\n\n*YES* पोस्ट करने के लिए | *NO* रद्द करने के लिए"
+        ),
+    }
+    return msgs.get(lang, msgs["en"])
+
+
+def _create_individual_job(phone: str, ctx: dict, db: Session) -> Job:
+    worker = db.query(Worker).filter(Worker.phone == phone).first()
+    poster_name = worker.name if worker else None
+    if not poster_name:
+        contractor = db.query(Contractor).filter(Contractor.phone == phone).first()
+        poster_name = contractor.name if contractor else "User"
+
+    job_date = date_type.fromisoformat(ctx["hire_date"])
+    job = Job(
+        job_type='individual',
+        poster_phone=phone,
+        poster_name=poster_name,
+        title=ctx["hire_title"],
+        skill=SkillEnum(ctx["hire_skill"]),
+        required_count=1,
+        job_date=job_date,
+        rate=ctx.get("hire_rate") or 0,
+        location=ctx["hire_location"],
+        city=ctx["hire_city"],
+        expires_at=datetime.combine(job_date, time_type(23, 59, 59)),
+    )
+    db.add(job)
+    db.flush()
+    return job

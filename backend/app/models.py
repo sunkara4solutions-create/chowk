@@ -60,6 +60,14 @@ class BotState(str, enum.Enum):
     con_city = "con_city"
     contractor = "contractor"
     con_awaiting_confirm = "con_awaiting_confirm"
+    # Hire flow (individual job posting — worker or contractor)
+    hire_title = "hire_title"
+    hire_skill = "hire_skill"
+    hire_date = "hire_date"
+    hire_location = "hire_location"
+    hire_city = "hire_city"
+    hire_rate = "hire_rate"
+    hire_confirm = "hire_confirm"
 
 
 class Worker(Base):

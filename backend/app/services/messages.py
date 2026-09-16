@@ -71,6 +71,7 @@ MSG = {
             "*You are registered on Chowk!* ✅\n\n"
             "Name: {name}\nSkill: {skill}\nCity: {city}\nDaily Rate: ₹{rate}\n\n"
             "You will receive job notifications when work is available in {city}.\n\n"
+            "🔨 Need workers yourself? Reply *HIRE* to post a job.\n\n"
             "📱 *Want more control?* Download the Chowk app to browse jobs, track applications and update your profile:\n"
             "https://chowk.yourstockpicker.com\n\n"
             "Reply *STOP* to unsubscribe anytime."
@@ -79,6 +80,7 @@ MSG = {
             "*మీరు Chowk లో నమోదయ్యారు!* ✅\n\n"
             "పేరు: {name}\nనైపుణ్యం: {skill}\nనగరం: {city}\nరోజువారీ రేటు: ₹{rate}\n\n"
             "{city} లో పని అందుబాటులో ఉన్నప్పుడు మీకు నోటిఫికేషన్లు వస్తాయి.\n\n"
+            "🔨 మీకే కార్మికులు కావాలా? పని పోస్ట్ చేయడానికి *HIRE* అని రిప్లై చేయండి.\n\n"
             "📱 *యాప్ డౌన్‌లోడ్ చేయండి* — జాబ్‌లు చూడండి, అప్లికేషన్లు ట్రాక్ చేయండి:\n"
             "https://chowk.yourstockpicker.com\n\n"
             "ఎప్పుడైనా *STOP* అని రిప్లై చేయండి."
@@ -87,15 +89,16 @@ MSG = {
             "*आप Chowk पर पंजीकृत हो गए!* ✅\n\n"
             "नाम: {name}\nहुनर: {skill}\nशहर: {city}\nरोज़ की मजदूरी: ₹{rate}\n\n"
             "{city} में काम मिलने पर आपको सूचना मिलेगी।\n\n"
+            "🔨 खुद मजदूर चाहिए? काम पोस्ट करने के लिए *HIRE* लिखें।\n\n"
             "📱 *ऐप डाउनलोड करें* — काम देखें, आवेदन ट्रैक करें:\n"
             "https://chowk.yourstockpicker.com\n\n"
             "कभी भी *STOP* लिखकर अनसब्सक्राइब करें।"
         ),
     },
     "welcome_back": {
-        "en": "Welcome back, {name}! 👋\nSkill: {skill}\nCity: {city}\n\nYou will receive job alerts automatically. Reply *STOP* to unsubscribe.",
-        "te": "తిరిగి స్వాగతం, {name}! 👋\nనైపుణ్యం: {skill}\nనగరం: {city}\n\nమీకు పని అలర్ట్‌లు స్వయంచాలకంగా వస్తాయి. అన్‌సబ్‌స్క్రైబ్ చేయడానికి *STOP* అని రిప్లై చేయండి.",
-        "hi": "वापसी पर स्वागत है, {name}! 👋\nहुनर: {skill}\nशहर: {city}\n\nकाम के अलर्ट अपने आप आएंगे। अनसब्सक्राइब के लिए *STOP* लिखें।",
+        "en": "Welcome back, {name}! 👋\nSkill: {skill}\nCity: {city}\n\nYou will receive job alerts automatically.\n\n🔨 Need workers yourself? Reply *HIRE* to post a job.\nReply *STOP* to unsubscribe.",
+        "te": "తిరిగి స్వాగతం, {name}! 👋\nనైపుణ్యం: {skill}\nనగరం: {city}\n\nమీకు పని అలర్ట్‌లు స్వయంచాలకంగా వస్తాయి.\n\n🔨 మీకే కార్మికులు కావాలా? *HIRE* అని రిప్లై చేయండి.\nఅన్‌సబ్‌స్క్రైబ్ చేయడానికి *STOP* అని రిప్లై చేయండి.",
+        "hi": "वापसी पर स्वागत है, {name}! 👋\nहुनर: {skill}\nशहर: {city}\n\nकाम के अलर्ट अपने आप आएंगे।\n\n🔨 खुद मजदूर चाहिए? *HIRE* लिखें।\nअनसब्सक्राइब के लिए *STOP* लिखें।",
     },
     "unsubscribed": {
         "en": "You have been unsubscribed from Chowk. Reply *Hi* to re-register.",
@@ -219,9 +222,9 @@ MSG = {
         "hi": "माफ़ करें, इस काम का ऑफर समाप्त हो गया।",
     },
     "fallback": {
-        "en": "You're registered on Chowk ✅\n\nWe'll notify you when a matching job is available.\n\nReply *Hi* to see your profile | *STOP* to unsubscribe.",
-        "te": "మీరు Chowk లో నమోదయ్యారు ✅\n\nసరిపోయే పని అందుబాటులో ఉన్నప్పుడు మీకు తెలియజేస్తాము.\n\nమీ ప్రొఫైల్ చూడడానికి *Hi* | అన్‌సబ్‌స్క్రైబ్ చేయడానికి *STOP*",
-        "hi": "आप Chowk पर पंजीकृत हैं ✅\n\nमिलता-जुलता काम मिलने पर हम सूचित करेंगे।\n\nप्रोफ़ाइल देखने के लिए *Hi* | अनसब्सक्राइब के लिए *STOP*",
+        "en": "You're registered on Chowk ✅\n\nWe'll notify you when a matching job is available.\n\nReply *Hi* to see your profile | *HIRE* to post a job | *STOP* to unsubscribe.",
+        "te": "మీరు Chowk లో నమోదయ్యారు ✅\n\nసరిపోయే పని అందుబాటులో ఉన్నప్పుడు మీకు తెలియజేస్తాము.\n\nమీ ప్రొఫైల్ చూడడానికి *Hi* | పని పోస్ట్ చేయడానికి *HIRE* | అన్‌సబ్‌స్క్రైబ్ చేయడానికి *STOP*",
+        "hi": "आप Chowk पर पंजीकृत हैं ✅\n\nमिलता-जुलता काम मिलने पर हम सूचित करेंगे।\n\nप्रोफ़ाइल देखने के लिए *Hi* | काम पोस्ट करने के लिए *HIRE* | अनसब्सक्राइब के लिए *STOP*",
     },
     # ── Contractor messages ──────────────────────────────────────────────
     "ask_role": {
@@ -375,6 +378,89 @@ MSG = {
         "en": "🎉 *Job fully filled!* All {required} {skill} workers confirmed for {city} on {date}.",
         "te": "🎉 *పని పూర్తిగా నిండింది!* {city} లో {date} న అన్ని {required} {skill} కార్మికులు కన్ఫర్మ్ చేశారు.",
         "hi": "🎉 *काम पूरा भर गया!* {city} में {date} को सभी {required} {skill} मजदूर कन्फर्म हो गए।",
+    },
+    # ── Hire flow (individual job posting — worker or contractor) ─────────
+    "hire_ask_title": {
+        "en": "🔨 *Post a Job*\n\nWhat do you need done? (e.g. \"Fix leaking tap\" or \"Need 2 more painters\")",
+        "te": "🔨 *పని పోస్ట్ చేయండి*\n\nమీకు ఏమి కావాలి? (ఉదా. \"లీక్ అవుతున్న ట్యాప్ బాగు చేయాలి\")",
+        "hi": "🔨 *काम पोस्ट करें*\n\nआपको क्या करवाना है? (जैसे \"लीक हो रहा नल ठीक करना\")",
+    },
+    "hire_title_invalid": {
+        "en": "Please describe the work in a few words.",
+        "te": "దయచేసి పనిని కొన్ని పదాలలో వివరించండి.",
+        "hi": "कृपया काम के बारे में कुछ शब्दों में बताएं।",
+    },
+    "hire_ask_skill": {
+        "en": (
+            "What type of work is this? Reply with a number:\n"
+            "1. Painter\n2. Mason\n3. Electrician\n4. Plumber\n"
+            "5. Carpenter\n6. Welder\n7. Tiles Worker\n8. Helper\n9. Construction Laborer"
+        ),
+        "te": (
+            "ఇది ఏ రకమైన పని? నంబర్‌తో రిప్లై చేయండి:\n"
+            "1. పెయింటర్\n2. మేసన్\n3. ఎలక్ట్రీషియన్\n4. ప్లంబర్\n"
+            "5. కార్పెంటర్\n6. వెల్డర్\n7. టైల్స్ వర్కర్\n8. హెల్పర్\n9. కన్స్ట్రక్షన్ లేబర్"
+        ),
+        "hi": (
+            "यह किस तरह का काम है? नंबर से जवाब दें:\n"
+            "1. पेंटर\n2. राजमिस्त्री\n3. इलेक्ट्रीशियन\n4. प्लंबर\n"
+            "5. बढ़ई\n6. वेल्डर\n7. टाइल्स वर्कर\n8. हेल्पर\n9. निर्माण मजदूर"
+        ),
+    },
+    "hire_skill_invalid": {
+        "en": "Please reply with a single number 1-9.",
+        "te": "దయచేసి 1-9 మధ్య ఒక నంబర్ తో జవాబివ్వండి.",
+        "hi": "कृपया 1 से 9 के बीच एक नंबर से जवाब दें।",
+    },
+    "hire_ask_date": {
+        "en": "When do you need this done?\n\nReply *TODAY*, *TOMORROW*, or a date (DD-MM-YYYY).",
+        "te": "మీకు ఇది ఎప్పుడు కావాలి?\n\n*TODAY*, *TOMORROW*, లేదా తేదీ (DD-MM-YYYY) అని రిప్లై చేయండి.",
+        "hi": "आपको यह कब चाहिए?\n\n*TODAY*, *TOMORROW*, या तारीख (DD-MM-YYYY) लिखें।",
+    },
+    "hire_date_invalid": {
+        "en": "Please reply TODAY, TOMORROW, or a date like 25-12-2026.",
+        "te": "దయచేసి TODAY, TOMORROW, లేదా 25-12-2026 వంటి తేదీని రిప్లై చేయండి.",
+        "hi": "कृपया TODAY, TOMORROW, या 25-12-2026 जैसी तारीख लिखें।",
+    },
+    "hire_ask_location": {
+        "en": "What's the address or location?",
+        "te": "చిరునామా లేదా స్థలం ఏమిటి?",
+        "hi": "पता या जगह क्या है?",
+    },
+    "hire_location_invalid": {
+        "en": "Please enter a valid address or location.",
+        "te": "దయచేసి సరైన చిరునామా లేదా స్థలం నమోదు చేయండి.",
+        "hi": "कृपया सही पता या जगह लिखें।",
+    },
+    "hire_ask_city": {
+        "en": "Which city is this in?\n\n{cities}\n\nOr type your city name.",
+        "te": "ఇది ఏ నగరంలో ఉంది?\n\n{cities}\n\nలేదా మీ నగరం పేరు టైప్ చేయండి.",
+        "hi": "यह किस शहर में है?\n\n{cities}\n\nया शहर का नाम टाइप करें।",
+    },
+    "hire_ask_rate": {
+        "en": "What's your budget per day? (in rupees)\n\nReply a number, or *SKIP* to let workers name their price.",
+        "te": "మీ రోజువారీ బడ్జెట్ ఎంత? (రూపాయలలో)\n\nనంబర్ రిప్లై చేయండి, లేదా కార్మికులే రేటు చెప్పాలంటే *SKIP* అని రిప్లై చేయండి.",
+        "hi": "आपका रोज़ का बजट कितना है? (रुपये में)\n\nनंबर लिखें, या मजदूरों को खुद रेट बताने देने के लिए *SKIP* लिखें।",
+    },
+    "hire_rate_invalid": {
+        "en": "Please enter a number, or reply SKIP.",
+        "te": "దయచేసి నంబర్ నమోదు చేయండి, లేదా SKIP అని రిప్లై చేయండి.",
+        "hi": "कृपया नंबर लिखें, या SKIP लिखें।",
+    },
+    "hire_confirm_invalid": {
+        "en": "Reply *YES* to post or *NO* to cancel.",
+        "te": "పోస్ట్ చేయడానికి *YES* లేదా రద్దు చేయడానికి *NO* అని రిప్లై చేయండి.",
+        "hi": "पोस्ट करने के लिए *YES* या रद्द करने के लिए *NO* लिखें।",
+    },
+    "hire_posted": {
+        "en": "✅ *Job posted!*\n\nWorkers nearby will be able to bid on it. You'll get a WhatsApp message when someone bids.\n\nReply *Hi* to go back to your menu.",
+        "te": "✅ *పని పోస్ట్ చేయబడింది!*\n\nసమీపంలోని కార్మికులు దీనిపై బిడ్ చేయగలరు. ఎవరైనా బిడ్ చేసినప్పుడు మీకు WhatsApp మెసేజ్ వస్తుంది.\n\nమీ మెనూకి తిరిగి వెళ్లడానికి *Hi* అని రిప్లై చేయండి.",
+        "hi": "✅ *काम पोस्ट हो गया!*\n\nआस-पास के मजदूर इस पर बिड कर सकेंगे। कोई बिड करेगा तो आपको WhatsApp मैसेज मिलेगा।\n\nअपने मेनू पर वापस जाने के लिए *Hi* लिखें।",
+    },
+    "hire_cancelled": {
+        "en": "Cancelled. No job was posted. Reply *Hi* to go back to your menu.",
+        "te": "రద్దు చేయబడింది. పని పోస్ట్ చేయలేదు. మీ మెనూకి వెళ్లడానికి *Hi* అని రిప్లై చేయండి.",
+        "hi": "रद्द किया गया। कोई काम पोस्ट नहीं हुआ। अपने मेनू पर जाने के लिए *Hi* लिखें।",
     },
 }
 

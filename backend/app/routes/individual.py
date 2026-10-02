@@ -198,6 +198,31 @@ def place_bid(
     return BidOut.model_validate(bid)
 
 
+# ── Cancel / delete a posting (poster only) ────────────────────────────────────
+
+@router.post("/jobs/{job_id}/cancel", status_code=200)
+def cancel_individual_job(
+    job_id: str,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_any_mobile_user),
+):
+    _require_registered(payload)
+    phone = payload["sub"]
+    job = db.query(Job).filter(Job.job_id == job_id, Job.job_type == 'individual').first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if job.poster_phone != phone:
+        raise HTTPException(status_code=403, detail="Only the poster can cancel this job")
+    if job.status == JobStatus.completed:
+        raise HTTPException(status_code=400, detail="Completed jobs cannot be cancelled")
+    if job.status == JobStatus.cancelled:
+        raise HTTPException(status_code=400, detail="Job is already cancelled")
+
+    job.status = JobStatus.cancelled
+    db.commit()
+    return {"message": "Job cancelled"}
+
+
 # ── Accept a bid (poster only) ────────────────────────────────────────────────
 
 @router.post("/jobs/{job_id}/bids/{bid_id}/accept", status_code=200)

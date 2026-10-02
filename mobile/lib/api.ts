@@ -171,6 +171,9 @@ export const acceptBid = (job_id: string, bid_id: string) =>
 export const markJobComplete = (job_id: string) =>
   api.post(`/mobile/individual/jobs/${job_id}/complete`);
 
+export const cancelIndividualJob = (job_id: string) =>
+  api.post(`/mobile/individual/jobs/${job_id}/cancel`);
+
 export const leaveReview = (job_id: string, rating: number, comment?: string) =>
   api.post(`/mobile/individual/jobs/${job_id}/review`, { rating, comment });
 

@@ -7,7 +7,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  getIndividualJob, placeBid, acceptBid, markJobComplete, leaveReview,
+  getIndividualJob, placeBid, acceptBid, markJobComplete, leaveReview, cancelIndividualJob,
 } from '../../../lib/api';
 import { COLORS, SKILL_LABELS, SKILL_EMOJIS } from '../../../lib/config';
 import type { IndividualJobDetail, Bid } from '../../../lib/types';
@@ -125,6 +125,18 @@ export default function IndividualJobScreen() {
     onError: (e: any) => Alert.alert('Error', e.response?.data?.detail ?? 'Failed'),
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelIndividualJob(id!),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-individual-jobs'] });
+      qc.invalidateQueries({ queryKey: ['individual-jobs'] });
+      Alert.alert('Job Cancelled', 'Your job posting has been removed.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    },
+    onError: (e: any) => Alert.alert('Error', e.response?.data?.detail ?? 'Failed to cancel job'),
+  });
+
   if (isLoading || !job) {
     return (
       <View style={styles.center}>
@@ -217,6 +229,24 @@ export default function IndividualJobScreen() {
                   />
                 ))}
               </>
+            )}
+
+            {(job.status === 'open' || job.status === 'filled') && (
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() =>
+                  Alert.alert('Cancel this job?', 'This will remove the posting and it can\'t be undone.', [
+                    { text: 'Keep it', style: 'cancel' },
+                    { text: 'Cancel Job', style: 'destructive', onPress: () => cancelMutation.mutate() },
+                  ])
+                }
+                disabled={cancelMutation.isPending}
+              >
+                <Ionicons name="trash-outline" size={16} color="#E74C3C" />
+                <Text style={styles.cancelBtnText}>
+                  {cancelMutation.isPending ? 'Cancelling...' : 'Cancel / Delete Job'}
+                </Text>
+              </TouchableOpacity>
             )}
 
             {job.status === 'filled' && (
@@ -393,6 +423,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 16, marginBottom: 16,
   },
   completeBtnText: { fontSize: 15, fontWeight: '800', color: '#fff' },
+
+  cancelBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#FEE2E2', borderRadius: 12, padding: 14,
+    marginHorizontal: 16, marginBottom: 16,
+  },
+  cancelBtnText: { fontSize: 14, fontWeight: '700', color: '#E74C3C' },
 
   reviewCard: {
     backgroundColor: COLORS.card, borderRadius: 14, padding: 16,

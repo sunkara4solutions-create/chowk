@@ -294,7 +294,7 @@ class ContractorOut(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    contractor: ContractorOut
+    contractor: Optional[ContractorOut] = None
 
 
 # ─── Job ──────────────────────────────────────────────────────────────────────

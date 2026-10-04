@@ -30,7 +30,8 @@ def admin_stats(db: Session = Depends(get_db), admin: Admin = Depends(get_curren
     return AdminStats(
         total_workers=db.query(Worker).filter(Worker.is_active == True).count(),
         total_contractors=db.query(Contractor).filter(Contractor.is_active == True).count(),
-        total_jobs=db.query(Job).count(),
+        total_jobs=db.query(Job).filter(Job.job_type == 'contractor').count(),
+        total_individual_jobs=db.query(Job).filter(Job.job_type == 'individual').count(),
         jobs_today=db.query(Job).filter(Job.job_date == today).count(),
         workers_available=db.query(Worker).filter(Worker.is_available == True, Worker.is_active == True).count(),
     )

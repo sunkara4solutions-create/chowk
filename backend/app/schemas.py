@@ -312,7 +312,10 @@ class JobCreate(BaseModel):
 
 class JobOut(BaseModel):
     job_id: UUID
-    contractor_id: UUID
+    contractor_id: Optional[UUID] = None
+    job_type: str = 'contractor'
+    poster_name: Optional[str] = None
+    title: Optional[str] = None
     skill: SkillEnum
     required_count: int
     confirmed_count: int
@@ -379,6 +382,7 @@ class AdminStats(BaseModel):
     total_workers: int
     total_contractors: int
     total_jobs: int
+    total_individual_jobs: int
     jobs_today: int
     workers_available: int
 

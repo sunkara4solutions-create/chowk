@@ -81,11 +81,12 @@ export default function AdminPage() {
         </div>
 
         {stats && (
-          <div className="grid grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-6 gap-4 mb-8">
             {[
               ["Workers", stats.total_workers],
               ["Contractors", stats.total_contractors],
               ["Total Jobs", stats.total_jobs],
+              ["Small Jobs", stats.total_individual_jobs],
               ["Jobs Today", stats.jobs_today],
               ["Available Now", stats.workers_available],
             ].map(([label, value]) => (
@@ -101,15 +102,27 @@ export default function AdminPage() {
           <div className="bg-white border rounded-xl">
             <div className="px-5 py-4 border-b font-semibold">Recent Jobs ({jobs.length})</div>
             <div className="divide-y max-h-96 overflow-y-auto">
-              {(jobs as { job_id: string; skill: string; city: string; required_count: number; confirmed_count: number; status: string; job_date: string }[]).map((j) => (
-                <div key={j.job_id} className="px-5 py-3 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{SKILL_LABELS[j.skill as keyof typeof SKILL_LABELS]}</span>
-                    <span className="text-xs text-gray-400">{j.confirmed_count}/{j.required_count}</span>
+              {(jobs as { job_id: string; job_type?: string; title?: string; poster_name?: string; skill: string; city: string; required_count: number; confirmed_count: number; status: string; job_date: string }[]).map((j) => {
+                const isIndividual = j.job_type === "individual";
+                return (
+                  <div key={j.job_id} className="px-5 py-3 text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium truncate">
+                        {isIndividual ? (j.title || SKILL_LABELS[j.skill as keyof typeof SKILL_LABELS]) : SKILL_LABELS[j.skill as keyof typeof SKILL_LABELS]}
+                      </span>
+                      {isIndividual ? (
+                        <span className="text-xs shrink-0 bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Small Job</span>
+                      ) : (
+                        <span className="text-xs text-gray-400 shrink-0">{j.confirmed_count}/{j.required_count}</span>
+                      )}
+                    </div>
+                    <p className="text-gray-400 text-xs">
+                      {isIndividual && j.poster_name ? `${j.poster_name} • ` : ""}
+                      {j.city} • {format(new Date(j.job_date), "dd MMM")} • {j.status}
+                    </p>
                   </div>
-                  <p className="text-gray-400 text-xs">{j.city} • {format(new Date(j.job_date), "dd MMM")} • {j.status}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

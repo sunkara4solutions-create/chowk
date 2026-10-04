@@ -37,7 +37,10 @@ export interface Worker {
 
 export interface Job {
   job_id: string;
-  contractor_id: string;
+  contractor_id?: string;
+  job_type?: "contractor" | "individual";
+  poster_name?: string;
+  title?: string;
   skill: Skill;
   required_count: number;
   confirmed_count: number;

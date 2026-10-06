@@ -1,5 +1,9 @@
 export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8000';
 
+// UI-only gate for showing the Admin entry point in Settings — the actual
+// admin endpoints are protected server-side by the /admin/login password.
+export const ADMIN_PHONE = '7070108833';
+
 export const SKILLS = [
   'painter',
   'mason',

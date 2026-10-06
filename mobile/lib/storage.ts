@@ -28,6 +28,20 @@ export async function removeAll(): Promise<void> {
   await SecureStore.deleteItemAsync(ROLE_KEY);
 }
 
+const ADMIN_TOKEN_KEY = 'chowk_admin_token';
+
+export async function saveAdminToken(token: string): Promise<void> {
+  await SecureStore.setItemAsync(ADMIN_TOKEN_KEY, token);
+}
+
+export async function getAdminToken(): Promise<string | null> {
+  return await SecureStore.getItemAsync(ADMIN_TOKEN_KEY);
+}
+
+export async function removeAdminToken(): Promise<void> {
+  await SecureStore.deleteItemAsync(ADMIN_TOKEN_KEY);
+}
+
 const ONBOARDING_KEY = 'chowk_onboarding_seen';
 
 export async function hasSeenOnboarding(): Promise<boolean> {

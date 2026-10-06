@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { getContractorMe, updateContractorMe, updateContractorLocation, getContractorJobs, deleteAccount } from '../../lib/api';
 import { useAuthStore } from '../../store/auth';
-import { COLORS } from '../../lib/config';
+import { COLORS, ADMIN_PHONE } from '../../lib/config';
 import type { ContractorProfile, Job } from '../../lib/types';
 
 export default function ContractorProfileScreen() {
@@ -161,6 +161,13 @@ export default function ContractorProfileScreen() {
         <Text style={styles.editBtnText}>Edit Profile</Text>
       </TouchableOpacity>
 
+      {profile?.phone === ADMIN_PHONE && (
+        <TouchableOpacity style={styles.adminBtn} onPress={() => router.push('/admin')}>
+          <Ionicons name="shield-checkmark-outline" size={16} color={COLORS.primary} />
+          <Text style={styles.adminBtnText}>Admin Dashboard</Text>
+        </TouchableOpacity>
+      )}
+
       <TouchableOpacity
         style={styles.logoutBtn}
         onPress={() => Alert.alert('Logout', 'Are you sure?', [
@@ -253,6 +260,8 @@ const styles = StyleSheet.create({
   detailValue: { fontSize: 14, fontWeight: '600', color: COLORS.textPrimary, marginTop: 1 },
   editBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: COLORS.primary, marginHorizontal: 16, marginTop: 8, borderRadius: 12, padding: 14 },
   editBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  adminBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: COLORS.primary + '15', marginHorizontal: 16, marginTop: 8, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: COLORS.primary + '40' },
+  adminBtnText: { color: COLORS.primary, fontWeight: '700', fontSize: 15 },
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginHorizontal: 16, marginTop: 8, padding: 14 },
   logoutText: { color: '#E74C3C', fontWeight: '600', fontSize: 15 },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginHorizontal: 16, marginTop: 4, padding: 12 },

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Admin, Worker, Contractor, Job, Notification
-from app.schemas import AdminStats, ContractorOut, JobOut, TokenResponse
+from app.schemas import AdminStats, ContractorOut, JobOut, TokenResponse, WorkerOut
 from app.core.auth import get_current_admin, verify_password, create_token, hash_password
 from pydantic import BaseModel
 
@@ -37,6 +37,12 @@ def admin_stats(db: Session = Depends(get_db), admin: Admin = Depends(get_curren
     )
 
 
+@router.get("/workers")
+def list_workers(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    workers = db.query(Worker).order_by(Worker.created_at.desc()).all()
+    return [WorkerOut.model_validate(w) for w in workers]
+
+
 @router.get("/contractors")
 def list_contractors(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
     contractors = db.query(Contractor).all()
@@ -65,3 +71,13 @@ def deactivate_contractor(contractor_id: str, db: Session = Depends(get_db), adm
     c.is_active = False
     db.commit()
     return {"message": "Contractor deactivated"}
+
+
+@router.post("/workers/{worker_id}/deactivate")
+def deactivate_worker(worker_id: str, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    w = db.query(Worker).filter(Worker.worker_id == worker_id).first()
+    if not w:
+        raise HTTPException(status_code=404, detail="Worker not found")
+    w.is_active = False
+    db.commit()
+    return {"message": "Worker deactivated"}

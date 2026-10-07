@@ -26,6 +26,8 @@ export const adminLogin = (phone: string, password: string) =>
 
 export const getAdminStats = () => adminApi.get('/admin/stats');
 
+export const listAllWorkers = () => adminApi.get('/admin/workers');
+
 export const listAllJobs = () => adminApi.get('/admin/jobs');
 
 export const listAllContractors = () => adminApi.get('/admin/contractors');

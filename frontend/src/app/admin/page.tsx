@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getAdminStats, listAllJobs, listAllContractors, adminLogin } from "@/lib/api";
+import { getAdminStats, listWorkers, listAllJobs, listAllContractors, adminLogin } from "@/lib/api";
 import { SKILL_LABELS } from "@/lib/types";
 import { format } from "date-fns";
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(null);
   const [stats, setStats] = useState<Record<string, number> | null>(null);
+  const [workers, setWorkers] = useState<unknown[]>([]);
   const [jobs, setJobs] = useState<unknown[]>([]);
   const [contractors, setContractors] = useState<unknown[]>([]);
   const [phone, setPhone] = useState("");
@@ -21,6 +22,7 @@ export default function AdminPage() {
   const loadData = (t: string) => {
     localStorage.setItem("chowk_token", t);
     getAdminStats().then((r) => setStats(r.data)).catch(() => {});
+    listWorkers().then((r) => setWorkers(r.data)).catch(() => {});
     listAllJobs().then((r) => setJobs(r.data)).catch(() => {});
     listAllContractors().then((r) => setContractors(r.data)).catch(() => {});
   };
@@ -98,7 +100,26 @@ export default function AdminPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-3 gap-6">
+          <div className="bg-white border rounded-xl">
+            <div className="px-5 py-4 border-b font-semibold">Workers ({workers.length})</div>
+            <div className="divide-y max-h-96 overflow-y-auto">
+              {(workers as { worker_id: string; name: string; phone: string; city: string; skills: string[]; daily_rate: number; is_available: boolean }[]).map((w) => (
+                <div key={w.worker_id} className="px-5 py-3 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium truncate">{w.name}</span>
+                    {!w.is_available && (
+                      <span className="text-xs shrink-0 bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Unavailable</span>
+                    )}
+                  </div>
+                  <p className="text-gray-400 text-xs">
+                    {w.skills.map((s) => SKILL_LABELS[s as keyof typeof SKILL_LABELS] ?? s).join(", ")} • {w.city} • ₹{w.daily_rate}/day • {w.phone}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="bg-white border rounded-xl">
             <div className="px-5 py-4 border-b font-semibold">Recent Jobs ({jobs.length})</div>
             <div className="divide-y max-h-96 overflow-y-auto">

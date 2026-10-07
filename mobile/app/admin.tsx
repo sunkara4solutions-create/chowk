@@ -6,7 +6,7 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { adminLogin, getAdminStats, listAllJobs, listAllContractors } from '../lib/adminApi';
+import { adminLogin, getAdminStats, listAllWorkers, listAllJobs, listAllContractors } from '../lib/adminApi';
 import { getAdminToken, saveAdminToken, removeAdminToken } from '../lib/storage';
 import { COLORS, SKILL_LABELS } from '../lib/config';
 
@@ -40,6 +40,17 @@ type AdminContractor = {
   phone: string;
 };
 
+type AdminWorker = {
+  worker_id: string;
+  name: string;
+  phone: string;
+  city: string;
+  skills: string[];
+  daily_rate: number;
+  is_available: boolean;
+  is_active: boolean;
+};
+
 export default function AdminScreen() {
   const insets = useSafeAreaInsets();
   const [checkingSession, setCheckingSession] = useState(true);
@@ -50,6 +61,7 @@ export default function AdminScreen() {
 
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [workers, setWorkers] = useState<AdminWorker[]>([]);
   const [jobs, setJobs] = useState<AdminJob[]>([]);
   const [contractors, setContractors] = useState<AdminContractor[]>([]);
 
@@ -67,12 +79,14 @@ export default function AdminScreen() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [statsRes, jobsRes, contractorsRes] = await Promise.all([
+      const [statsRes, workersRes, jobsRes, contractorsRes] = await Promise.all([
         getAdminStats(),
+        listAllWorkers(),
         listAllJobs(),
         listAllContractors(),
       ]);
       setStats(statsRes.data);
+      setWorkers(workersRes.data);
       setJobs(jobsRes.data);
       setContractors(contractorsRes.data);
     } catch (e: any) {
@@ -111,6 +125,7 @@ export default function AdminScreen() {
           await removeAdminToken();
           setAuthed(false);
           setStats(null);
+          setWorkers([]);
           setJobs([]);
           setContractors([]);
         },
@@ -188,6 +203,25 @@ export default function AdminScreen() {
                   ))}
                 </View>
               )}
+
+              <Text style={styles.sectionTitle}>WORKERS ({workers.length})</Text>
+              <View style={styles.card}>
+                {workers.slice(0, 30).map(w => (
+                  <View key={w.worker_id} style={styles.row}>
+                    <View style={styles.rowTop}>
+                      <Text style={styles.rowTitle} numberOfLines={1}>{w.name}</Text>
+                      {!w.is_available && (
+                        <View style={[styles.badge, { backgroundColor: '#F3F4F6' }]}>
+                          <Text style={[styles.badgeText, { color: COLORS.textSecondary }]}>Unavailable</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.rowSub}>
+                      {w.skills.map(s => SKILL_LABELS[s as keyof typeof SKILL_LABELS] ?? s).join(', ')} • {w.city} • ₹{w.daily_rate}/day • {w.phone}
+                    </Text>
+                  </View>
+                ))}
+              </View>
 
               <Text style={styles.sectionTitle}>RECENT JOBS ({jobs.length})</Text>
               <View style={styles.card}>
